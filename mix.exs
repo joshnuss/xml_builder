@@ -9,7 +9,7 @@ defmodule XmlBuilder.Mixfile do
      package: [
        contributors: ["Joshua Nussbaum"],
        licenses: ["MIT"],
-       links: [github: "https://github.com/joshnuss/xml_builder"]
+       links: %{github: "https://github.com/joshnuss/xml_builder"}
      ],
      description: """
      XML xml_builder for Elixir
