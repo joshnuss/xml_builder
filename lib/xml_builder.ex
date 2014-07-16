@@ -51,7 +51,7 @@ defmodule XmlBuilder do
     do: Enum.map_join(children, "", &element/1)
 
   defp build_content(content),
-    do: content
+    do: escape(content)
 
   defp build_attributes(attrs),
     do: Enum.map_join(attrs, " ", fn {k,v} -> "#{k}=#{quote_attribute_value(v)}" end)
@@ -62,12 +62,16 @@ defmodule XmlBuilder do
   defp quote_attribute_value(val) do
     double = String.contains?(val, ~s|"|)
     single = String.contains?(val, "'")
+    escaped = escape(val)
 
     cond do
       double && single ->
-        val |> String.replace("\"", "&quot;") |> quote_attribute_value
-      double -> "'#{val}'"
-      true -> ~s|"#{val}"|
+        escaped |> String.replace("\"", "&quot;") |> quote_attribute_value
+      double -> "'#{escaped}'"
+      true -> ~s|"#{escaped}"|
     end
   end
+
+  defp escape(string),
+    do: string |> String.replace(">", "&gt;") |> String.replace("<", "&lt;")
 end

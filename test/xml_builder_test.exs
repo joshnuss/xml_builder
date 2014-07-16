@@ -36,10 +36,15 @@ defmodule XmlXmlBuilderTest do
     assert XmlBuilder.doc([{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) == ~s|<?xml version="1.0"><first_name>Josh</first_name><last_name>Nussbaum</last_name>|
   end
 
-  test "quoting attributes" do
-    assert XmlBuilder.element("person", %{height: 12}) == ~s|<person height="12"/>|
-    assert XmlBuilder.element("person", %{height: ~s|10'|}) == ~s|<person height="10'"/>|
-    assert XmlBuilder.element("person", %{height: ~s|10"|}) == ~s|<person height='10"'/>|
-    assert XmlBuilder.element("person", %{height: ~s|10'5"|}) == ~s|<person height="10'5&quot;"/>|
+  test "quoting and escaping attributes" do
+    assert XmlBuilder.element(:person, %{height: 12}) == ~s|<person height="12"/>|
+    assert XmlBuilder.element(:person, %{height: ~s|10'|}) == ~s|<person height="10'"/>|
+    assert XmlBuilder.element(:person, %{height: ~s|10"|}) == ~s|<person height='10"'/>|
+    assert XmlBuilder.element(:person, %{height: ~s|<10'5"|}) == ~s|<person height="&lt;10'5&quot;"/>|
+  end
+
+  test "escaping content" do
+    assert XmlBuilder.element(:person, "Josh") == "<person>Josh</person>"
+    assert XmlBuilder.element(:person, "<Josh>") == "<person>&lt;Josh&gt;</person>"
   end
 end
