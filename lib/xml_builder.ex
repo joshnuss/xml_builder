@@ -1,4 +1,22 @@
 defmodule XmlBuilder do
+  @moduledoc """
+  A module for generating XML
+
+  ## Examples
+
+      iex> XmlBuilder.doc(:person)
+      "<?xml version=\\\"1.0\\\"><person/>"
+
+      iex> XmlBuilder.doc(:person, "Josh")
+      "<?xml version=\\\"1.0\\\"><person>Josh</person>"
+
+      iex> XmlBuilder.element(:person, "Josh")
+      "<person>Josh</person>"
+
+      iex> XmlBuilder.element(:person, %{occupation: "Developer"}, "Josh")
+      "<person occupation=\\\"Developer\\\">Josh</person>"
+  """
+
   def doc(name_or_tuple),
     do: doc_type <> element(name_or_tuple)
 

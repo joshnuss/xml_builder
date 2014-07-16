@@ -1,5 +1,6 @@
-defmodule XmlXmlBuilderTest do
+defmodule XmlBuilderTest do
   use ExUnit.Case
+  doctest XmlBuilder
 
   test "empty element" do
     assert XmlBuilder.doc(:person) == ~s|<?xml version="1.0"><person/>|
