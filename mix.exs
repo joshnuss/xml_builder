@@ -3,7 +3,7 @@ defmodule XmlBuilder.Mixfile do
 
   def project do
     [app: :xml_builder,
-     version: "0.0.1",
+     version: "0.0.2",
      elixir: "~> 0.14.2",
      deps: deps,
      package: [
@@ -12,7 +12,7 @@ defmodule XmlBuilder.Mixfile do
        links: %{github: "https://github.com/joshnuss/xml_builder"}
      ],
      description: """
-     XML xml_builder for Elixir
+     XML builder for Elixir
      """
    ]
   end
