@@ -42,3 +42,8 @@ IO.puts Builder.xml(
     fruit: "Strawberry")
 #=> "<fruit>Apple</fruit><fruit>Kiwi</fruit><fruit>Strawberry</fruit>"
 ```
+
+## Todo
+- better wrapping double vs. single quote, use escaping when neccesary
+- add doctype
+- add optional indentation
