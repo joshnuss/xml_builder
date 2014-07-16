@@ -30,4 +30,9 @@ defmodule BuilderTest do
     assert Builder.xml(:person, %{id: 123}, [{:name, "Josh"}]) == ~s|<person id="123"><name>Josh</name></person>|
     assert Builder.xml(:person, %{id: 123}, [{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) == ~s|<person id="123"><first_name>Josh</first_name><last_name>Nussbaum</last_name></person>|
   end
+
+  test "children elements" do
+    assert Builder.xml([{:name, %{id: 123}, "Josh"}]) == ~s|<name id="123">Josh</name>|
+    assert Builder.xml([{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) == ~s|<first_name>Josh</first_name><last_name>Nussbaum</last_name>|
+  end
 end

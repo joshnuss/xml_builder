@@ -2,6 +2,9 @@ defmodule Builder do
   def xml(name) when is_bitstring(name) or is_atom(name),
     do: xml({name})
 
+  def xml(list) when is_list(list),
+    do: build_content(list)
+
   def xml({name}),
     do: xml({name, nil, nil})
 
