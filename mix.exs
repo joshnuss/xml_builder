@@ -5,7 +5,16 @@ defmodule Builder.Mixfile do
     [app: :builder,
      version: "0.0.1",
      elixir: "~> 0.14.2",
-     deps: deps]
+     deps: deps,
+     package: [
+       contributors: ["Joshua Nussbaum"],
+       licenses: ["MIT"],
+       links: [github: "https://github.com/joshnuss/builder"]
+     ],
+     description: """
+     XML builder for Elixir
+     """
+   ]
   end
 
   # Configuration for the OTP application
