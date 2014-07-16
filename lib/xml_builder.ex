@@ -1,4 +1,4 @@
-defmodule Builder do
+defmodule XmlBuilder do
   def xml(name) when is_bitstring(name) or is_atom(name),
     do: xml({name})
 

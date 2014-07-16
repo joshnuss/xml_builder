@@ -1,18 +1,18 @@
-defmodule Builder.Mixfile do
+defmodule XmlBuilder.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :builder,
+    [app: :xml_builder,
      version: "0.0.1",
      elixir: "~> 0.14.2",
      deps: deps,
      package: [
        contributors: ["Joshua Nussbaum"],
        licenses: ["MIT"],
-       links: [github: "https://github.com/joshnuss/builder"]
+       links: [github: "https://github.com/joshnuss/xml_builder"]
      ],
      description: """
-     XML builder for Elixir
+     XML xml_builder for Elixir
      """
    ]
   end
