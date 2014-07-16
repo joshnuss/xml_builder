@@ -44,6 +44,5 @@ IO.puts XmlBuilder.doc(
 ```
 
 ## Todo
-- better wrapping double vs. single quote, use escaping when neccesary
-- add doctype
+- better attribute wrapping double vs. single quote, use escaping when neccesary
 - add optional indentation
