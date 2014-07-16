@@ -1,4 +1,4 @@
-XML XmlBuilder
+XML Builder
 =======
 
 Elixir library for building xml
