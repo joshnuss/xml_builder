@@ -35,4 +35,11 @@ defmodule XmlXmlBuilderTest do
     assert XmlBuilder.doc([{:name, %{id: 123}, "Josh"}]) == ~s|<?xml version="1.0"><name id="123">Josh</name>|
     assert XmlBuilder.doc([{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) == ~s|<?xml version="1.0"><first_name>Josh</first_name><last_name>Nussbaum</last_name>|
   end
+
+  test "quoting attributes" do
+    assert XmlBuilder.element("person", %{height: 12}) == ~s|<person height="12"/>|
+    assert XmlBuilder.element("person", %{height: ~s|10'|}) == ~s|<person height="10'"/>|
+    assert XmlBuilder.element("person", %{height: ~s|10"|}) == ~s|<person height='10"'/>|
+    assert XmlBuilder.element("person", %{height: ~s|10'5"|}) == ~s|<person height="10'5&quot;"/>|
+  end
 end

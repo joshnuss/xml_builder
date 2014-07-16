@@ -54,5 +54,20 @@ defmodule XmlBuilder do
     do: content
 
   defp build_attributes(attrs),
-    do: Enum.map_join(attrs, " ", fn {k,v} -> ~s/#{k}="#{v}"/ end)
+    do: Enum.map_join(attrs, " ", fn {k,v} -> "#{k}=#{quote_attribute_value(v)}" end)
+
+  defp quote_attribute_value(val) when not is_bitstring(val),
+    do: quote_attribute_value(to_string(val))
+
+  defp quote_attribute_value(val) do
+    double = String.contains?(val, ~s|"|)
+    single = String.contains?(val, "'")
+
+    cond do
+      double && single ->
+        val |> String.replace("\"", "&quot;") |> quote_attribute_value
+      double -> "'#{val}'"
+      true -> ~s|"#{val}"|
+    end
+  end
 end
