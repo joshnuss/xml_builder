@@ -92,11 +92,8 @@ defmodule XmlBuilder do
   defp generate_attributes(attrs),
     do: Enum.map_join(attrs, " ", fn {k,v} -> "#{k}=#{quote_attribute_value(v)}" end)
 
-  defp indent(0),
-    do: ""
-
   defp indent(level),
-    do: Enum.map_join(1..level, fn _ -> "\t" end)
+    do: String.duplicate("\t", level)
 
   defp quote_attribute_value(val) when not is_bitstring(val),
     do: quote_attribute_value(to_string(val))
