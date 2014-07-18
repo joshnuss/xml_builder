@@ -11,13 +11,17 @@ Each xml node is structured as a tuple of name, attributes map and content/list:
 {name, attrs, content | list}
 ```
 
-### A simple element like `<person>Josh</person>`, would look like:
+### A simple element
+
+Like `<person>Josh</person>`, would look like:
 
 ```elixir
 {:person, %{id: 12345}, "Josh"}
 ```
 
-### To define a list of elements: <person><first>Josh</first><last>Nussbaum</last></person>
+### To define a list of elements
+
+Like `<person><first>Josh</first><last>Nussbaum</last></person>`
 
 ```elixir
 {:person, %{id: 12345}, [{:first, nil, "Josh"}, {:last, nil, "Nussbaum"}]}
