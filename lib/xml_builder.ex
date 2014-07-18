@@ -96,7 +96,7 @@ defmodule XmlBuilder do
     do: ""
 
   defp indent(level),
-    do: Enum.map_join(0..level-1, fn _ -> "\t" end)
+    do: Enum.map_join(1..level, fn _ -> "\t" end)
 
   defp quote_attribute_value(val) when not is_bitstring(val),
     do: quote_attribute_value(to_string(val))
