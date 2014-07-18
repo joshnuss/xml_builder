@@ -13,7 +13,7 @@ Each xml node is structured as a tuple of name, attributes map and content/list:
 
 ### A simple element
 
-Like `<person>Josh</person>`, would look like:
+Like `<person id="12345">Josh</person>`, would look like:
 
 ```elixir
 {:person, %{id: 12345}, "Josh"}
@@ -21,7 +21,7 @@ Like `<person>Josh</person>`, would look like:
 
 ### An element with child elements
 
-Like `<person><first>Josh</first><last>Nussbaum</last></person>`
+Like `<person id="12345"><first>Josh</first><last>Nussbaum</last></person>`
 
 ```elixir
 {:person, %{id: 12345}, [{:first, nil, "Josh"}, {:last, nil, "Nussbaum"}]}
