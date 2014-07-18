@@ -4,11 +4,11 @@ defmodule XmlBuilder do
 
   ## Examples
 
-      iex> XmlBuilder.doc(:person) |> XmlBuilder.generate
-      "<?xml version=\\\"1.0\\\"><person/>"
+      iex> XmlBuilder.doc(:person)
+      "<?xml version=\\\"1.0\\\">\\n<person/>"
 
-      iex> XmlBuilder.doc(:person, "Josh") |> XmlBuilder.generate
-      "<?xml version=\\\"1.0\\\"><person>Josh</person>"
+      iex> XmlBuilder.doc(:person, "Josh")
+      "<?xml version=\\\"1.0\\\">\\n<person>Josh</person>"
 
       iex> XmlBuilder.element(:person, "Josh") |> XmlBuilder.generate
       "<person>Josh</person>"
@@ -18,13 +18,13 @@ defmodule XmlBuilder do
   """
 
   def doc(name_or_tuple),
-    do: [:_doc_type | element(name_or_tuple) |> List.wrap]
+    do: [:_doc_type | element(name_or_tuple) |> List.wrap] |> generate
 
   def doc(name, attrs_or_content),
-    do: [:_doc_type | [element(name, attrs_or_content)]]
+    do: [:_doc_type | [element(name, attrs_or_content)]] |> generate
 
   def doc(name, attrs, content),
-    do: [:_doc_type | [element(name, attrs, content)]]
+    do: [:_doc_type | [element(name, attrs, content)]] |> generate
 
   def element(name) when is_bitstring(name) or is_atom(name),
     do: element({name})
@@ -41,47 +41,56 @@ defmodule XmlBuilder do
   def element({name, content}),
     do: element({name, nil, content})
 
+  def element({name, attrs, content}) when is_list(content),
+    do: {name, attrs, Enum.map(content, &element/1)}
+
+  def element(tuple={_name, _attrs, _content}),
+    do: tuple
+
   def element(name, attrs) when is_map(attrs),
     do: element({name, attrs, nil})
 
   def element(name, content),
     do: element({name, nil, content})
 
-  def element({name, attrs, content}) when is_list(content),
-    do: {name, attrs, Enum.map(content, &element/1)}
-
   def element(name, attrs, content),
     do: element({name, attrs, content})
 
-  def element(tuple={_name, _attrs, _content}),
-    do: tuple
+  def generate(any),
+    do: generate(any, 0)
 
-  def generate(:_doc_type),
+  def generate(:_doc_type, _level),
     do: ~s|<?xml version="1.0">|
 
-  def generate(list) when is_list(list),
-    do: Enum.map_join(list, &generate/1)
+  def generate(list, level) when is_list(list),
+    do: list |> Enum.map(&(generate(&1, level))) |> Enum.intersperse("\n") |> Enum.join
 
-  def generate({name, attrs, content}) when (attrs == nil or map_size(attrs) == 0) and (content==nil or (is_list(content) and length(content)==0)),
-    do: "<#{name}/>"
+  def generate({name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and (content==nil or (is_list(content) and length(content)==0)),
+    do: "#{indent(level)}<#{name}/>"
 
-  def generate({name, attrs, content}) when content==nil or (is_list(content) and length(content)==0),
-    do: "<#{name} #{generate_attributes(attrs)}/>"
+  def generate({name, attrs, content}, level) when content==nil or (is_list(content) and length(content)==0),
+    do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}/>"
 
-  def generate({name, attrs, content}) when attrs == nil or map_size(attrs) == 0,
-    do: "<#{name}>#{generate_content(content)}</#{name}>"
+  def generate({name, attrs, content}, level) when attrs == nil or map_size(attrs) == 0,
+    do: "#{indent(level)}<#{name}>#{generate_content(content, level+1)}</#{name}>"
 
-  def generate({name, attrs, content}),
-    do: "<#{name} #{generate_attributes(attrs)}>#{generate_content(content)}</#{name}>"
+  def generate({name, attrs, content}, level),
+    do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}>#{generate_content(content, level+1)}</#{name}>"
 
-  defp generate_content(children) when is_list(children),
-    do: Enum.map_join(children, "", &generate/1)
+  defp generate_content(children, level) when is_list(children),
+    do: "\n" <> Enum.map_join(children, "\n", &(generate(&1, level))) <> "\n"
 
-  defp generate_content(content),
+  defp generate_content(content, _level),
     do: escape(content)
 
   defp generate_attributes(attrs),
     do: Enum.map_join(attrs, " ", fn {k,v} -> "#{k}=#{quote_attribute_value(v)}" end)
+
+  defp indent(0),
+    do: ""
+
+  defp indent(level),
+    do: Enum.map_join(0..level-1, fn _ -> "\t" end)
 
   defp quote_attribute_value(val) when not is_bitstring(val),
     do: quote_attribute_value(to_string(val))
@@ -98,6 +107,9 @@ defmodule XmlBuilder do
       true -> ~s|"#{escaped}"|
     end
   end
+
+  defp escape(data) when not is_bitstring(data),
+    do: escape(to_string(data))
 
   defp escape(string),
     do: string |> String.replace(">", "&gt;") |> String.replace("<", "&lt;")
