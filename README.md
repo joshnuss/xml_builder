@@ -11,6 +11,16 @@ Each xml node is structured as a tuple of name, attributes map and content/list:
 {name, attrs, content | list}
 ```
 
+## Installation
+
+```elixir
+def deps do
+  [{:xml_builder, "~> 0.0.4"}]
+end
+```
+
+## Examples
+
 ### A simple element
 
 Like `<person id="12345">Josh</person>`, would look like:
