@@ -13,6 +13,8 @@ Each xml node is structured as a tuple of name, attributes map and content/list:
 
 ## Installation
 
+Add dependency to your project's `mix.exs`
+
 ```elixir
 def deps do
   [{:xml_builder, "~> 0.0.4"}]
