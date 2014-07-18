@@ -51,6 +51,10 @@ defmodule XmlBuilderTest do
     assert element(:person, "<Josh>") == "<person>&lt;Josh&gt;</person>"
   end
 
+  test "multi level indentation" do
+    assert doc([person: [first: "Josh", last: "Nussbaum"]]) == ~s|<?xml version="1.0">\n<person>\n\t<first>Josh</first>\n\t<last>Nussbaum</last>\n</person>|
+  end
+
   def element(name, arg),
     do: XmlBuilder.element(name, arg) |> XmlBuilder.generate
 

@@ -71,14 +71,20 @@ defmodule XmlBuilder do
   def generate({name, attrs, content}, level) when content==nil or (is_list(content) and length(content)==0),
     do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}/>"
 
-  def generate({name, attrs, content}, level) when attrs == nil or map_size(attrs) == 0,
+  def generate({name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and not is_list(content),
     do: "#{indent(level)}<#{name}>#{generate_content(content, level+1)}</#{name}>"
 
-  def generate({name, attrs, content}, level),
+  def generate({name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and is_list(content),
+    do: "#{indent(level)}<#{name}>#{generate_content(content, level+1)}\n#{indent(level)}</#{name}>"
+
+  def generate({name, attrs, content}, level) when map_size(attrs) > 0 and not is_list(content),
     do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}>#{generate_content(content, level+1)}</#{name}>"
 
+  def generate({name, attrs, content}, level) when map_size(attrs) > 0 and is_list(content),
+    do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}>#{generate_content(content, level+1)}\n#{indent(level)}</#{name}>"
+
   defp generate_content(children, level) when is_list(children),
-    do: "\n" <> Enum.map_join(children, "\n", &(generate(&1, level))) <> "\n"
+    do: "\n" <> Enum.map_join(children, "\n", &(generate(&1, level)))
 
   defp generate_content(content, _level),
     do: escape(content)
