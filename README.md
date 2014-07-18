@@ -9,19 +9,31 @@ Each xml node is structured as a tuple of name, attributes map and content/list:
 
 ```elixir
 {name, attrs, content | list}
+```
 
-# to define the xml <person>Josh</person>, you would need a tuple like:
+### A simple element like `<person>Josh</person>`, would look like:
+
+```elixir
 {:person, %{id: 12345}, "Josh"}
+```
 
-# to define a list of elements: <person><first>Josh</first><last>Nussbaum</last></person>
+### To define a list of elements: <person><first>Josh</first><last>Nussbaum</last></person>
+
+```elixir
 {:person, %{id: 12345}, [{:first, nil, "Josh"}, {:last, nil, "Nussbaum"}]}
+```
 
-# To make things more readable, you dont need to create the tuples manually, just use XmlBuilder's convenience methods instead.
+For more readability, you dont need to create tuples manually, use XmlBuilder's convenience methods instead.
 
-# this results in <?xml version="1.0"><person>Josh</person>
+```elixir
 XmlBuilder.doc(:person, "Josh")
+```
 
-# you can build a complex element, using the element function:
+### Complex element
+
+A complex element is just a simple element whose content is a list. You can build a complex element manually or by using the element function:
+
+```elixir
 import XmlBuilder
 
 def person(id, first, last) do
