@@ -1,9 +1,9 @@
 XML Builder
 =======
 
-Elixir library for building xml.
-
 ## Overview
+
+An Elixir library for building xml.
 
 Each xml node is structured as a tuple of name, attributes map and content/list:
 
@@ -29,7 +29,7 @@ Like `<person><first>Josh</first><last>Nussbaum</last></person>`
 
 ### Convenience Functions
 
-For more readability, you dont need to create tuples manually, use XmlBuilder's methods instead.
+For more readability, you can use XmlBuilder's methods instead of creating tuples manually.
 
 ```elixir
 XmlBuilder.doc(:person, "Josh")
@@ -50,7 +50,7 @@ def person(id, first, last) do
 end
 
 iex> person(123, "Josh", "Nussbaum") |> generate
-"<person><first>Josh</first><last>Nussbaum</last></person>"
+"<person id=\"123\"><first>Josh</first><last>Nussbaum</last></person>"
 ```
 
 #### Using keyed lists
@@ -66,5 +66,5 @@ def person(id, first, last) do
 end
 
 iex> person(123, "Josh", "Nussbaum") |> generate
-"<person><first>Josh</first><last>Nussbaum</last></person>"
+"<person id=\"123\"><first>Josh</first><last>Nussbaum</last></person>"
 ```
