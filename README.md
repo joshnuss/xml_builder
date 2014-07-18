@@ -42,7 +42,3 @@ IO.puts XmlBuilder.doc(
     fruit: "Strawberry")
 #=> <?xml version="1.0"><fruit>Apple</fruit><fruit>Kiwi</fruit><fruit>Strawberry</fruit>
 ```
-
-## Todo
-- better attribute wrapping double vs. single quote, use escaping when neccesary
-- add optional indentation
