@@ -59,7 +59,7 @@ defmodule XmlBuilder do
   def generate(any),
     do: generate(any, 0)
 
-  def generate(:_doc_type, _level),
+  def generate(:_doc_type, 0),
     do: ~s|<?xml version="1.0">|
 
   def generate(list, level) when is_list(list),
