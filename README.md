@@ -19,7 +19,7 @@ Like `<person>Josh</person>`, would look like:
 {:person, %{id: 12345}, "Josh"}
 ```
 
-### To define a list of elements
+### An element with child elements
 
 Like `<person><first>Josh</first><last>Nussbaum</last></person>`
 
