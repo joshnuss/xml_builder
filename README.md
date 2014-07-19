@@ -28,7 +28,7 @@ end
 Like `<person id="12345">Josh</person>`, would look like:
 
 ```elixir
-{:person, %{id: 12345}, "Josh"}
+{:person, %{id: 12345}, "Josh"} |> XmlBuilder.generate
 ```
 
 ### An element with child elements
@@ -36,7 +36,7 @@ Like `<person id="12345">Josh</person>`, would look like:
 Like `<person id="12345"><first>Josh</first><last>Nussbaum</last></person>`
 
 ```elixir
-{:person, %{id: 12345}, [{:first, nil, "Josh"}, {:last, nil, "Nussbaum"}]}
+{:person, %{id: 12345}, [{:first, nil, "Josh"}, {:last, nil, "Nussbaum"}]} |> XmlBuilder.generate
 ```
 
 ### Convenience Functions
@@ -45,6 +45,13 @@ For more readability, you can use XmlBuilder's methods instead of creating tuple
 
 ```elixir
 XmlBuilder.doc(:person, "Josh")
+```
+
+Outputs
+
+```xml
+<?xml version="1.0">
+<person>Josh</person>
 ```
 
 #### Building up an element
@@ -61,8 +68,21 @@ def person(id, first, last) do
   ])
 end
 
-iex> person(123, "Josh", "Nussbaum") |> generate
-"<person id=\"123\"><first>Josh</first><last>Nussbaum</last></person>"
+iex> [person(123, "Steve", "Jobs"),
+      person(456, "Steve", "Wozniak")] |> generate
+```
+
+Outputs
+
+```xml
+<person id="123">
+  <first>Steve</first>
+  <last>Jobs</last>
+</person>"
+<person id="456">
+  <first>Steve</first>
+  <last>Wozniak</last>
+</person>"
 ```
 
 #### Using keyed lists
