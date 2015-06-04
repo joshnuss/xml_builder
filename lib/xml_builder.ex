@@ -114,6 +114,11 @@ defmodule XmlBuilder do
   defp escape(data) when not is_bitstring(data),
     do: escape(to_string(data))
 
-  defp escape(string),
-    do: string |> String.replace(">", "&gt;") |> String.replace("<", "&lt;")
+  defp escape(string) do
+    string 
+    |> String.replace(">", "&gt;") 
+    |> String.replace("<", "&lt;")
+    |> fn(s) -> Regex.replace(~r/&(?!lt;|gt;|quot;)/, s, "&amp;") end.()
+  end
+
 end

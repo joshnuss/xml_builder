@@ -49,6 +49,7 @@ defmodule XmlBuilderTest do
   test "escaping content" do
     assert element(:person, "Josh") == "<person>Josh</person>"
     assert element(:person, "<Josh>") == "<person>&lt;Josh&gt;</person>"
+    assert element(:data, "1 <> 2 & 2 <> 3") == "<data>1 &lt;&gt; 2 &amp; 2 &lt;&gt; 3</data>"
   end
 
   test "multi level indentation" do
