@@ -118,7 +118,10 @@ defmodule XmlBuilder do
     string 
     |> String.replace(">", "&gt;") 
     |> String.replace("<", "&lt;")
-    |> fn(s) -> Regex.replace(~r/&(?!lt;|gt;|quot;)/, s, "&amp;") end.()
+    |> replace_ampersand
   end
 
+  defp replace_ampersand(string) do
+    Regex.replace(~r/&(?!lt;|gt;|quot;)/, string, "&amp;")
+  end
 end
