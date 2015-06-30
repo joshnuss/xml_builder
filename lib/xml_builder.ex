@@ -3,7 +3,6 @@ defmodule XmlBuilder do
   A module for generating XML
 
   ## Examples
-<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
       iex> XmlBuilder.doc(:person)
       "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"no\\\" ?>\\n<person/>"
 
