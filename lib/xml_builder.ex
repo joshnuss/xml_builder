@@ -3,11 +3,12 @@ defmodule XmlBuilder do
   A module for generating XML
 
   ## Examples
+
       iex> XmlBuilder.doc(:person)
-      "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"no\\\" ?>\\n<person/>"
+      "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>\\n<person/>"
 
       iex> XmlBuilder.doc(:person, "Josh")
-      "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"no\\\" ?>\\n<person>Josh</person>"
+      "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>\\n<person>Josh</person>"
 
       iex> XmlBuilder.element(:person, "Josh") |> XmlBuilder.generate
       "<person>Josh</person>"
@@ -59,7 +60,7 @@ defmodule XmlBuilder do
     do: generate(any, 0)
 
   def generate(:_doc_type, 0),
-    do: ~s|<?xml version="1.0" encoding="UTF-8" standalone="no" ?>|
+    do: ~s|<?xml version="1.0" encoding="UTF-8" ?>|
 
   def generate(list, level) when is_list(list),
     do: list |> Enum.map(&(generate(&1, level))) |> Enum.intersperse("\n") |> Enum.join
