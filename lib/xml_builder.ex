@@ -10,6 +10,9 @@ defmodule XmlBuilder do
       iex> XmlBuilder.doc(:person, "Josh")
       "<?xml version=\\\"1.0\\\">\\n<person>Josh</person>"
 
+      iex> XmlBuilder.comment("a person") |> XmlBuilder.generate
+      "<!--a person-->"
+
       iex> XmlBuilder.element(:person, "Josh") |> XmlBuilder.generate
       "<person>Josh</person>"
 
@@ -25,6 +28,9 @@ defmodule XmlBuilder do
 
   def doc(name, attrs, content),
     do: [:_doc_type | [element(name, attrs, content)]] |> generate
+
+  def comment(content),
+    do: element(nil, nil, content)
 
   def element(name) when is_bitstring(name) or is_atom(name),
     do: element({name})
@@ -64,6 +70,9 @@ defmodule XmlBuilder do
 
   def generate(list, level) when is_list(list),
     do: list |> Enum.map(&(generate(&1, level))) |> Enum.intersperse("\n") |> Enum.join
+
+  def generate({name, _attrs, content}, level) when (name == nil),
+    do: "#{indent(level)}<!--#{generate_content(content, level+1)}-->"
 
   def generate({name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and (content==nil or (is_list(content) and length(content)==0)),
     do: "#{indent(level)}<#{name}/>"
