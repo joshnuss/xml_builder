@@ -20,6 +20,10 @@ defmodule XmlBuilderTest do
     assert doc(XmlBuilder.comment("a comment")) == ~s|<?xml version="1.0">\n<!--a comment-->|
   end
 
+  test "document with element and a comment" do
+    assert doc(:person, [XmlBuilder.comment("a comment")]) == ~s|<?xml version="1.0">\n<person>\n\t<!--a comment-->\n</person>|
+  end
+
   test "element with content" do
     assert doc(:person, "Josh") == ~s|<?xml version="1.0">\n<person>Josh</person>|
   end
