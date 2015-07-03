@@ -10,6 +10,9 @@ defmodule XmlBuilder do
       iex> XmlBuilder.doc(:person, "Josh")
       "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>\\n<person>Josh</person>"
 
+      iex> XmlBuilder.comment("a person") |> XmlBuilder.generate
+      "<!--a person-->"
+
       iex> XmlBuilder.element(:person, "Josh") |> XmlBuilder.generate
       "<person>Josh</person>"
 
@@ -18,13 +21,16 @@ defmodule XmlBuilder do
   """
 
   def doc(name_or_tuple),
-    do: [:_doc_type | element(name_or_tuple) |> List.wrap] |> generate
+    do: [:_doc_type | tree_node(name_or_tuple) |> List.wrap] |> generate
 
   def doc(name, attrs_or_content),
     do: [:_doc_type | [element(name, attrs_or_content)]] |> generate
 
   def doc(name, attrs, content),
     do: [:_doc_type | [element(name, attrs, content)]] |> generate
+
+  def comment(content),
+    do: {:comment, content}
 
   def element(name) when is_bitstring(name) or is_atom(name),
     do: element({name})
@@ -42,10 +48,10 @@ defmodule XmlBuilder do
     do: element({name, nil, content})
 
   def element({name, attrs, content}) when is_list(content),
-    do: {name, attrs, Enum.map(content, &element/1)}
+    do: {:element, name, attrs, Enum.map(content, &tree_node/1)}
 
-  def element(tuple={_name, _attrs, _content}),
-    do: tuple
+  def element({name, attrs, content}),
+    do: {:element, name, attrs, content}
 
   def element(name, attrs) when is_map(attrs),
     do: element({name, attrs, nil})
@@ -65,23 +71,32 @@ defmodule XmlBuilder do
   def generate(list, level) when is_list(list),
     do: list |> Enum.map(&(generate(&1, level))) |> Enum.intersperse("\n") |> Enum.join
 
-  def generate({name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and (content==nil or (is_list(content) and length(content)==0)),
+  def generate({:comment, content}, level),
+    do: "#{indent(level)}<!--#{generate_content(content, level+1)}-->"
+
+  def generate({:element, name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and (content==nil or (is_list(content) and length(content)==0)),
     do: "#{indent(level)}<#{name}/>"
 
-  def generate({name, attrs, content}, level) when content==nil or (is_list(content) and length(content)==0),
+  def generate({:element, name, attrs, content}, level) when content==nil or (is_list(content) and length(content)==0),
     do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}/>"
 
-  def generate({name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and not is_list(content),
+  def generate({:element, name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and not is_list(content),
     do: "#{indent(level)}<#{name}>#{generate_content(content, level+1)}</#{name}>"
 
-  def generate({name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and is_list(content),
+  def generate({:element, name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and is_list(content),
     do: "#{indent(level)}<#{name}>#{generate_content(content, level+1)}\n#{indent(level)}</#{name}>"
 
-  def generate({name, attrs, content}, level) when map_size(attrs) > 0 and not is_list(content),
+  def generate({:element, name, attrs, content}, level) when map_size(attrs) > 0 and not is_list(content),
     do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}>#{generate_content(content, level+1)}</#{name}>"
 
-  def generate({name, attrs, content}, level) when map_size(attrs) > 0 and is_list(content),
+  def generate({:element, name, attrs, content}, level) when map_size(attrs) > 0 and is_list(content),
     do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}>#{generate_content(content, level+1)}\n#{indent(level)}</#{name}>"
+
+  defp tree_node(tuple={:comment, _content}),
+    do: tuple
+
+  defp tree_node(element_spec),
+    do: element(element_spec)
 
   defp generate_content(children, level) when is_list(children),
     do: "\n" <> Enum.map_join(children, "\n", &(generate(&1, level)))

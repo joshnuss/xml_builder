@@ -8,6 +8,22 @@ defmodule XmlBuilderTest do
     assert doc(:person) == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<person/>|
   end
 
+  test "simple comment" do
+    assert comment("a comment") == ~s|<!--a comment-->|
+  end
+
+  test "comment with escaping" do
+    assert comment("a -->comment") == ~s|<!--a --&gt;comment-->|
+  end
+
+  test "empty document with comment" do
+    assert doc(XmlBuilder.comment("a comment")) == ~s|<?xml version="1.0">\n<!--a comment-->|
+  end
+
+  test "document with element and a comment" do
+    assert doc(:person, [XmlBuilder.comment("a comment")]) == ~s|<?xml version="1.0">\n<person>\n\t<!--a comment-->\n</person>|
+  end
+
   test "element with content" do
     assert doc(:person, "Josh") == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<person>Josh</person>|
   end
@@ -55,6 +71,9 @@ defmodule XmlBuilderTest do
   test "multi level indentation" do
     assert doc([person: [first: "Josh", last: "Nussbaum"]]) == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<person>\n\t<first>Josh</first>\n\t<last>Nussbaum</last>\n</person>|
   end
+
+  def comment(content),
+    do: XmlBuilder.comment(content) |> XmlBuilder.generate
 
   def element(name, arg),
     do: XmlBuilder.element(name, arg) |> XmlBuilder.generate
