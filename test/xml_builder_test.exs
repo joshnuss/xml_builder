@@ -68,6 +68,10 @@ defmodule XmlBuilderTest do
     assert element(:data, "1 <> 2 & 2 <> 3") == "<data>1 &lt;&gt; 2 &amp; 2 &lt;&gt; 3</data>"
   end
 
+  test "wrap content inside cdata and skip escaping" do
+    assert element(:person, {:cdata, "john & <is ok>"}) == "<person><![CDATA[john & <is ok>]]></person>"
+  end
+
   test "multi level indentation" do
     assert doc([person: [first: "Josh", last: "Nussbaum"]]) == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<person>\n\t<first>Josh</first>\n\t<last>Nussbaum</last>\n</person>|
   end
