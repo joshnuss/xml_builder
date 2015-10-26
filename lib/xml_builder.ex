@@ -126,12 +126,16 @@ defmodule XmlBuilder do
     end
   end
 
+  defp escape({:cdata, data}) do
+    "<![CDATA[#{data}]]>"
+  end
+
   defp escape(data) when not is_bitstring(data),
     do: escape(to_string(data))
 
   defp escape(string) do
-    string 
-    |> String.replace(">", "&gt;") 
+    string
+    |> String.replace(">", "&gt;")
     |> String.replace("<", "&lt;")
     |> replace_ampersand
   end
