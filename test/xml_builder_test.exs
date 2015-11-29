@@ -17,11 +17,11 @@ defmodule XmlBuilderTest do
   end
 
   test "empty document with comment" do
-    assert doc(XmlBuilder.comment("a comment")) == ~s|<?xml version="1.0">\n<!--a comment-->|
+    assert doc(XmlBuilder.comment("a comment")) == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<!--a comment-->|
   end
 
   test "document with element and a comment" do
-    assert doc(:person, [XmlBuilder.comment("a comment")]) == ~s|<?xml version="1.0">\n<person>\n\t<!--a comment-->\n</person>|
+    assert doc(:person, [XmlBuilder.comment("a comment")]) == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<person>\n\t<!--a comment-->\n</person>|
   end
 
   test "element with content" do
