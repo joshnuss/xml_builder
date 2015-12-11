@@ -7,7 +7,7 @@ defmodule XmlBuilder.Mixfile do
      elixir: ">= 0.14.0",
      deps: deps,
      package: [
-       contributors: ["Joshua Nussbaum"],
+       maintainers: ["Joshua Nussbaum"],
        licenses: ["MIT"],
        links: %{github: "https://github.com/joshnuss/xml_builder"}
      ],
