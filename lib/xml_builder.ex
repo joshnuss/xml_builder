@@ -20,6 +20,16 @@ defmodule XmlBuilder do
       "<s:person>Josh</s:person>"
   """
 
+
+  def doc(name_or_tuple),
+    do: [:_doc_type | tree_node(name_or_tuple) |> List.wrap] |> generate
+
+  def doc(name, attrs_or_content) when is_map(attrs_or_content) or is_list(attrs_or_content),
+    do: [:_doc_type | [element(name, attrs_or_content)]] |> generate
+
+  def doc(name, attrs, content),
+    do: [:_doc_type | [element(name, attrs, content)]] |> generate
+
   def doc(name_or_tuple, namespace) when is_bitstring(namespace),
     do: [:_doc_type | tree_node(name_or_tuple) |> List.wrap] |> generate(namespace)
 
@@ -28,15 +38,6 @@ defmodule XmlBuilder do
 
   def doc(name, attrs, content, namespace) when is_list(content) and is_bitstring(namespace),
     do: [:_doc_type | [element(name, attrs, content)]] |> generate(namespace)
-
-  def doc(name_or_tuple),
-    do: [:_doc_type | tree_node(name_or_tuple) |> List.wrap] |> generate
-
-  def doc(name, attrs_or_content),
-    do: [:_doc_type | [element(name, attrs_or_content)]] |> generate
-
-  def doc(name, attrs, content),
-    do: [:_doc_type | [element(name, attrs, content)]] |> generate
 
   def element(name) when is_bitstring(name) or is_atom(name),
     do: element({name})
