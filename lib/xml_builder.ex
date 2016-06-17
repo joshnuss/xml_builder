@@ -15,28 +15,25 @@ defmodule XmlBuilder do
 
       iex> XmlBuilder.element(:person, %{occupation: "Developer"}, "Josh") |> XmlBuilder.generate
       "<person occupation=\\\"Developer\\\">Josh</person>"
-
-      iex> XmlBuilder.element(:person, "Josh") |> XmlBuilder.generate("s")
-      "<s:person>Josh</s:person>"
   """
 
 
   def doc(name_or_tuple),
     do: [:_doc_type | tree_node(name_or_tuple) |> List.wrap] |> generate
 
-  def doc(name, attrs_or_content) when is_map(attrs_or_content) or is_list(attrs_or_content),
+  def doc(name, attrs_or_content),
     do: [:_doc_type | [element(name, attrs_or_content)]] |> generate
 
   def doc(name, attrs, content),
     do: [:_doc_type | [element(name, attrs, content)]] |> generate
 
-  def doc(name_or_tuple, namespace) when is_bitstring(namespace),
+  def namespace(name_or_tuple, namespace) when is_bitstring(namespace),
     do: [:_doc_type | tree_node(name_or_tuple) |> List.wrap] |> generate(namespace)
 
-  def doc(name, attrs_or_content, namespace) when (is_map(attrs_or_content) or is_list(attrs_or_content)) and is_bitstring(namespace),
+  def namespace(name, attrs_or_content, namespace) when (is_map(attrs_or_content) or is_list(attrs_or_content)) and is_bitstring(namespace),
     do: [:_doc_type | [element(name, attrs_or_content)]] |> generate(namespace)
 
-  def doc(name, attrs, content, namespace) when is_list(content) and is_bitstring(namespace),
+  def namespace(name, attrs, content, namespace) when is_list(content) and is_bitstring(namespace),
     do: [:_doc_type | [element(name, attrs, content)]] |> generate(namespace)
 
   def element(name) when is_bitstring(name) or is_atom(name),

@@ -2,7 +2,7 @@ defmodule XmlBuilderTest do
   use ExUnit.Case
   doctest XmlBuilder
 
-  import XmlBuilder, only: [doc: 1, doc: 2, doc: 3]
+  import XmlBuilder, only: [doc: 1, doc: 2, doc: 3, namespace: 2, namespace: 3,]
 
   test "empty element" do
     assert doc(:person) == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<person/>|
@@ -61,7 +61,7 @@ defmodule XmlBuilderTest do
   end
 
   test "add namespace s to Keyword List" do
-    assert doc([person: [first: "Josh", last: "Nussbaum"]], "s") == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<s:person>\n\t<s:first>Josh</s:first>\n\t<s:last>Nussbaum</s:last>\n</s:person>|
+    assert namespace([person: [first: "Josh", last: "Nussbaum"]], "s") == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<s:person>\n\t<s:first>Josh</s:first>\n\t<s:last>Nussbaum</s:last>\n</s:person>|
   end
 
   def element(name, arg),
