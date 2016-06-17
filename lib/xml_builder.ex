@@ -15,7 +15,11 @@ defmodule XmlBuilder do
 
       iex> XmlBuilder.element(:person, %{occupation: "Developer"}, "Josh") |> XmlBuilder.generate
       "<person occupation=\\\"Developer\\\">Josh</person>"
+
+      iex> XmlBuilder.namespace([person: "Josh"], "s")
+      "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>\\n<s:person>Josh</s:person>"
   """
+
 
   def doc(name_or_tuple),
     do: [:_doc_type | tree_node(name_or_tuple) |> List.wrap] |> generate
@@ -25,6 +29,15 @@ defmodule XmlBuilder do
 
   def doc(name, attrs, content),
     do: [:_doc_type | [element(name, attrs, content)]] |> generate
+
+  def namespace(name_or_tuple, namespace) when is_bitstring(namespace),
+    do: [:_doc_type | tree_node(name_or_tuple) |> List.wrap] |> generate(namespace)
+
+  def namespace(name, attrs_or_content, namespace) when (is_map(attrs_or_content) or is_list(attrs_or_content)) and is_bitstring(namespace),
+    do: [:_doc_type | [element(name, attrs_or_content)]] |> generate(namespace)
+
+  def namespace(name, attrs, content, namespace) when is_list(content) and is_bitstring(namespace),
+    do: [:_doc_type | [element(name, attrs, content)]] |> generate(namespace)
 
   def element(name) when is_bitstring(name) or is_atom(name),
     do: element({name})
@@ -59,8 +72,35 @@ defmodule XmlBuilder do
   def generate(any),
     do: generate(any, 0)
 
+  def generate(any, namespace) when is_bitstring(namespace),
+    do: generate(any, 0, namespace)
+
   def generate(:_doc_type, 0),
     do: ~s|<?xml version="1.0" encoding="UTF-8" ?>|
+
+  def generate(:_doc_type, 0, namespace) when is_bitstring(namespace),
+    do: ~s|<?xml version="1.0" encoding="UTF-8" ?>|
+
+  def generate(list, level, namespace) when is_list(list) and is_bitstring(namespace),
+    do: list |> Enum.map(&(generate(&1, level, namespace))) |> Enum.intersperse("\n") |> Enum.join
+
+  def generate({name, attrs, content}, level, namespace) when (attrs == nil or map_size(attrs) == 0) and (content==nil or (is_list(content) and length(content)==0)) and is_bitstring(namespace),
+    do: "#{indent(level)}<#{namespace}:#{name}/>"
+
+  def generate({name, attrs, content}, level, namespace) when content==nil or (is_list(content) and length(content)==0) and is_bitstring(namespace),
+    do: "#{indent(level)}<#{namespace}:#{name} #{generate_attributes(attrs)}/>"
+
+  def generate({name, attrs, content}, level, namespace) when (attrs == nil or map_size(attrs) == 0) and not is_list(content) and is_bitstring(namespace),
+    do: "#{indent(level)}<#{namespace}:#{name}>#{generate_content(content, level+1, namespace)}</#{namespace}:#{name}>"
+
+  def generate({name, attrs, content}, level, namespace) when (attrs == nil or map_size(attrs) == 0) and is_list(content) and is_bitstring(namespace),
+    do: "#{indent(level)}<#{namespace}:#{name}>#{generate_content(content, level+1, namespace)}\n#{indent(level)}</#{namespace}:#{name}>"
+
+  def generate({name, attrs, content}, level, namespace) when map_size(attrs) > 0 and not is_list(content) and is_bitstring(namespace),
+    do: "#{indent(level)}<#{namespace}:#{name} #{generate_attributes(attrs)}>#{generate_content(content, level+1, namespace)}</#{namespace}:#{name}>"
+
+  def generate({name, attrs, content}, level, namespace) when map_size(attrs) > 0 and is_list(content) and is_bitstring(namespace),
+    do: "#{indent(level)}<#{namespace}:#{name} #{generate_attributes(attrs)}>#{generate_content(content, level+1, namespace)}\n#{indent(level)}</#{namespace}:#{name}>"
 
   def generate(list, level) when is_list(list),
     do: list |> Enum.map(&(generate(&1, level))) |> Enum.intersperse("\n") |> Enum.join
@@ -89,7 +129,13 @@ defmodule XmlBuilder do
   defp generate_content(children, level) when is_list(children),
     do: "\n" <> Enum.map_join(children, "\n", &(generate(&1, level)))
 
+  defp generate_content(children, level, namespace) when is_list(children) and is_bitstring(namespace),
+    do: "\n" <> Enum.map_join(children, "\n", &(generate(&1, level, namespace)))
+
   defp generate_content(content, _level),
+    do: escape(content)
+
+  defp generate_content(content, _level, namespace) when is_bitstring(namespace),
     do: escape(content)
 
   defp generate_attributes(attrs),
