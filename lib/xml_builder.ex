@@ -15,6 +15,9 @@ defmodule XmlBuilder do
 
       iex> XmlBuilder.element(:person, %{occupation: "Developer"}, "Josh") |> XmlBuilder.generate
       "<person occupation=\\\"Developer\\\">Josh</person>"
+
+      iex> XmlBuilder.namespace([person: "Josh"], "s")
+      "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>\\n<s:person>Josh</s:person>"
   """
 
 
