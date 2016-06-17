@@ -60,6 +60,10 @@ defmodule XmlBuilderTest do
     assert doc([person: [first: "Josh", last: "Nussbaum"]]) == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<person>\n\t<first>Josh</first>\n\t<last>Nussbaum</last>\n</person>|
   end
 
+  test "add namespace s to Keyword List" do
+    assert doc([person: [first: "Josh", last: "Nussbaum"]], "s") == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<s:person>\n\t<s:first>Josh</s:first>\n\t<s:last>Nussbaum</s:last>\n</s:person>|
+  end
+
   def element(name, arg),
     do: XmlBuilder.element(name, arg) |> XmlBuilder.generate
 
