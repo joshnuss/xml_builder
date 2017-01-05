@@ -1,6 +1,7 @@
 XML Builder
-[![Build Status](https://travis-ci.org/joshnuss/xml_builder.svg?branch=master)](https://travis-ci.org/joshnuss/xml_builder)
 =======
+
+[![Build Status](https://travis-ci.org/joshnuss/xml_builder.svg?branch=master)](https://travis-ci.org/joshnuss/xml_builder)
 
 ## Overview
 
