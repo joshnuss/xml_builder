@@ -34,6 +34,10 @@ defmodule XmlBuilderTest do
     assert doc(:person, %{id: 123}, [{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<person id="123">\n\t<first_name>Josh</first_name>\n\t<last_name>Nussbaum</last_name>\n</person>|
   end
 
+  test "element with text content" do
+    assert doc(:person, ["TextNode", {:name, %{id: 123}, "Josh"}, "TextNode"]) == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<person>\n\tTextNode\n\t<name id="123">Josh</name>\n\tTextNode\n</person>|
+  end
+
   test "children elements" do
     assert doc([{:name, %{id: 123}, "Josh"}]) == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<name id="123">Josh</name>|
     assert doc([{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) == ~s|<?xml version="1.0" encoding="UTF-8" ?>\n<first_name>Josh</first_name>\n<last_name>Nussbaum</last_name>|

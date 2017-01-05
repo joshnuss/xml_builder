@@ -17,6 +17,18 @@ defmodule XmlBuilder do
       "<person occupation=\\\"Developer\\\">Josh</person>"
   """
 
+  ##############################################################################
+
+  defmacrop is_blank_attrs(attrs) do
+    quote do: is_nil(unquote(attrs)) or map_size(unquote(attrs)) == 0
+  end
+
+  defmacrop is_blank_list(list) do
+    quote do: is_nil(unquote(list)) or (is_list(unquote(list)) and length(unquote(list)) == 0)
+  end
+
+  ##############################################################################
+
   def doc(name_or_tuple),
     do: [:_doc_type | tree_node(name_or_tuple) |> List.wrap] |> generate
 
@@ -25,6 +37,11 @@ defmodule XmlBuilder do
 
   def doc(name, attrs, content),
     do: [:_doc_type | [element(name, attrs, content)]] |> generate
+
+  ##############################################################################
+
+  def element(name) when is_binary(name),
+    do: element({nil, nil, name})
 
   def element(name) when is_bitstring(name) or is_atom(name),
     do: element({name})
@@ -56,6 +73,8 @@ defmodule XmlBuilder do
   def element(name, attrs, content),
     do: element({name, attrs, content})
 
+  ##############################################################################
+
   def generate(any),
     do: generate(any, 0)
 
@@ -65,26 +84,33 @@ defmodule XmlBuilder do
   def generate(list, level) when is_list(list),
     do: list |> Enum.map(&(generate(&1, level))) |> Enum.intersperse("\n") |> Enum.join
 
-  def generate({name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and (content==nil or (is_list(content) and length(content)==0)),
+  def generate({nil, nil, name}, level) when is_binary(name),
+    do: "#{indent(level)}#{name}"
+
+  def generate({name, attrs, content}, level) when is_blank_attrs(attrs) and is_blank_list(content),
     do: "#{indent(level)}<#{name}/>"
 
-  def generate({name, attrs, content}, level) when content==nil or (is_list(content) and length(content)==0),
+  def generate({name, attrs, content}, level) when is_blank_list(content),
     do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}/>"
 
-  def generate({name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and not is_list(content),
+  def generate({name, attrs, content}, level) when is_blank_attrs(attrs) and not is_list(content),
     do: "#{indent(level)}<#{name}>#{generate_content(content, level+1)}</#{name}>"
 
-  def generate({name, attrs, content}, level) when (attrs == nil or map_size(attrs) == 0) and is_list(content),
+  def generate({name, attrs, content}, level) when is_blank_attrs(attrs) and is_list(content),
     do: "#{indent(level)}<#{name}>#{generate_content(content, level+1)}\n#{indent(level)}</#{name}>"
 
-  def generate({name, attrs, content}, level) when map_size(attrs) > 0 and not is_list(content),
+  def generate({name, attrs, content}, level) when not is_blank_attrs(attrs) and not is_list(content),
     do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}>#{generate_content(content, level+1)}</#{name}>"
 
-  def generate({name, attrs, content}, level) when map_size(attrs) > 0 and is_list(content),
+  def generate({name, attrs, content}, level) when not is_blank_attrs(attrs) and is_list(content),
     do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}>#{generate_content(content, level+1)}\n#{indent(level)}</#{name}>"
+
+  ##############################################################################
 
   defp tree_node(element_spec),
     do: element(element_spec)
+
+  ##############################################################################
 
   defp generate_content(children, level) when is_list(children),
     do: "\n" <> Enum.map_join(children, "\n", &(generate(&1, level)))
@@ -95,8 +121,12 @@ defmodule XmlBuilder do
   defp generate_attributes(attrs),
     do: Enum.map_join(attrs, " ", fn {k,v} -> "#{k}=#{quote_attribute_value(v)}" end)
 
+  ##############################################################################
+
   defp indent(level),
     do: String.duplicate("\t", level)
+
+  ##############################################################################
 
   defp quote_attribute_value(val) when not is_bitstring(val),
     do: quote_attribute_value(to_string(val))
@@ -114,6 +144,8 @@ defmodule XmlBuilder do
     end
   end
 
+  ##############################################################################
+
   defp escape({:cdata, data}) do
     "<![CDATA[#{data}]]>"
   end
@@ -127,6 +159,8 @@ defmodule XmlBuilder do
     |> String.replace("<", "&lt;")
     |> replace_ampersand
   end
+
+  ##############################################################################
 
   defp replace_ampersand(string) do
     Regex.replace(~r/&(?!lt;|gt;|quot;)/, string, "&amp;")
