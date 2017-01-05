@@ -25,8 +25,6 @@ defmodule XmlBuilder do
     quote do: is_nil(unquote(list)) or (is_list(unquote(list)) and length(unquote(list)) == 0)
   end
 
-  ##############################################################################
-
   def doc(name_or_tuple),
     do: [:_doc_type | tree_node(name_or_tuple) |> List.wrap] |> generate
 
