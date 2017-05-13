@@ -5,10 +5,10 @@ defmodule XmlBuilder do
   ## Examples
 
       iex> XmlBuilder.doc(:person)
-      "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>\\n<person/>"
+      "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n</person>"
 
       iex> XmlBuilder.doc(:person, "Josh")
-      "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>\\n<person>Josh</person>"
+      "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<person>Josh</person>"
 
       iex> XmlBuilder.element(:person, "Josh") |> XmlBuilder.generate
       "<person>Josh</person>"
@@ -68,49 +68,49 @@ defmodule XmlBuilder do
     do: element({name, attrs, content})
 
   def generate(any),
-    do: generate(any, 0)
+    do: format(any, 0) |> IO.chardata_to_string
 
-  def generate(:_doc_type, 0),
-    do: ~s|<?xml version="1.0" encoding="UTF-8" ?>|
+  def format(:_doc_type, 0),
+    do: ~s|<?xml version="1.0" encoding="UTF-8"?>|
 
-  def generate(string, level) when is_bitstring(string),
-    do: generate({nil, nil, string}, level)
+  def format(string, level) when is_bitstring(string),
+    do: format({nil, nil, string}, level)
 
-  def generate(list, level) when is_list(list),
-    do: list |> Enum.map(&(generate(&1, level))) |> Enum.intersperse("\n") |> Enum.join
+  def format(list, level) when is_list(list),
+    do: list |> Enum.map(&format(&1, level)) |> Enum.intersperse("\n")
 
-  def generate({nil, nil, name}, level) when is_bitstring(name),
-    do: "#{indent(level)}#{name}"
+  def format({nil, nil, name}, level) when is_bitstring(name),
+    do: [indent(level), to_string(name)]
 
-  def generate({name, attrs, content}, level) when is_blank_attrs(attrs) and is_blank_list(content),
-    do: "#{indent(level)}<#{name}/>"
+  def format({name, attrs, content}, level) when is_blank_attrs(attrs) and is_blank_list(content),
+    do: [indent(level), '</', to_string(name), '>']
 
-  def generate({name, attrs, content}, level) when is_blank_list(content),
-    do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}/>"
+  def format({name, attrs, content}, level) when is_blank_list(content),
+    do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '/>']
 
-  def generate({name, attrs, content}, level) when is_blank_attrs(attrs) and not is_list(content),
-    do: "#{indent(level)}<#{name}>#{generate_content(content, level+1)}</#{name}>"
+  def format({name, attrs, content}, level) when is_blank_attrs(attrs) and not is_list(content),
+    do: [indent(level), '<', to_string(name), '>', format_content(content, level+1), '</', to_string(name), '>']
 
-  def generate({name, attrs, content}, level) when is_blank_attrs(attrs) and is_list(content),
-    do: "#{indent(level)}<#{name}>#{generate_content(content, level+1)}\n#{indent(level)}</#{name}>"
+  def format({name, attrs, content}, level) when is_blank_attrs(attrs) and is_list(content),
+    do: [indent(level), '<', to_string(name), '>', format_content(content, level+1), '\n', indent(level), '</', to_string(name), '>']
 
-  def generate({name, attrs, content}, level) when not is_blank_attrs(attrs) and not is_list(content),
-    do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}>#{generate_content(content, level+1)}</#{name}>"
+  def format({name, attrs, content}, level) when not is_blank_attrs(attrs) and not is_list(content),
+    do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1), '</', to_string(name), '>']
 
-  def generate({name, attrs, content}, level) when not is_blank_attrs(attrs) and is_list(content),
-    do: "#{indent(level)}<#{name} #{generate_attributes(attrs)}>#{generate_content(content, level+1)}\n#{indent(level)}</#{name}>"
+  def format({name, attrs, content}, level) when not is_blank_attrs(attrs) and is_list(content),
+    do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1), '\n', indent(level), '</', to_string(name), '>']
 
   defp tree_node(element_spec),
     do: element(element_spec)
 
-  defp generate_content(children, level) when is_list(children),
-    do: "\n" <> Enum.map_join(children, "\n", &(generate(&1, level)))
+  defp format_content(children, level) when is_list(children),
+    do: ['\n', Enum.map_join(children, "\n", &format(&1, level))]
 
-  defp generate_content(content, _level),
+  defp format_content(content, _level),
     do: escape(content)
 
-  defp generate_attributes(attrs),
-    do: Enum.map_join(attrs, " ", fn {k,v} -> "#{k}=#{quote_attribute_value(v)}" end)
+  defp format_attributes(attrs),
+    do: Enum.map_join(attrs, " ", fn {name,value} -> [to_string(name), '=', quote_attribute_value(value)] end)
 
   defp indent(level),
     do: String.duplicate("\t", level)
@@ -132,7 +132,7 @@ defmodule XmlBuilder do
   end
 
   defp escape({:cdata, data}) do
-    "<![CDATA[#{data}]]>"
+    ["<![CDATA[", data, "]]>"]
   end
 
   defp escape(data) when not is_bitstring(data),
