@@ -70,34 +70,34 @@ defmodule XmlBuilder do
   def generate(any),
     do: format(any, 0) |> IO.chardata_to_string
 
-  def format(:_doc_type, 0),
+  defp format(:_doc_type, 0),
     do: ~s|<?xml version="1.0" encoding="UTF-8"?>|
 
-  def format(string, level) when is_bitstring(string),
+  defp format(string, level) when is_bitstring(string),
     do: format({nil, nil, string}, level)
 
-  def format(list, level) when is_list(list),
+  defp format(list, level) when is_list(list),
     do: list |> Enum.map(&format(&1, level)) |> Enum.intersperse("\n")
 
-  def format({nil, nil, name}, level) when is_bitstring(name),
+  defp format({nil, nil, name}, level) when is_bitstring(name),
     do: [indent(level), to_string(name)]
 
-  def format({name, attrs, content}, level) when is_blank_attrs(attrs) and is_blank_list(content),
+  defp format({name, attrs, content}, level) when is_blank_attrs(attrs) and is_blank_list(content),
     do: [indent(level), '</', to_string(name), '>']
 
-  def format({name, attrs, content}, level) when is_blank_list(content),
+  defp format({name, attrs, content}, level) when is_blank_list(content),
     do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '/>']
 
-  def format({name, attrs, content}, level) when is_blank_attrs(attrs) and not is_list(content),
+  defp format({name, attrs, content}, level) when is_blank_attrs(attrs) and not is_list(content),
     do: [indent(level), '<', to_string(name), '>', format_content(content, level+1), '</', to_string(name), '>']
 
-  def format({name, attrs, content}, level) when is_blank_attrs(attrs) and is_list(content),
+  defp format({name, attrs, content}, level) when is_blank_attrs(attrs) and is_list(content),
     do: [indent(level), '<', to_string(name), '>', format_content(content, level+1), '\n', indent(level), '</', to_string(name), '>']
 
-  def format({name, attrs, content}, level) when not is_blank_attrs(attrs) and not is_list(content),
+  defp format({name, attrs, content}, level) when not is_blank_attrs(attrs) and not is_list(content),
     do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1), '</', to_string(name), '>']
 
-  def format({name, attrs, content}, level) when not is_blank_attrs(attrs) and is_list(content),
+  defp format({name, attrs, content}, level) when not is_blank_attrs(attrs) and is_list(content),
     do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1), '\n', indent(level), '</', to_string(name), '>']
 
   defp tree_node(element_spec),
