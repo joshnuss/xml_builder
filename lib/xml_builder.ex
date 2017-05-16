@@ -83,7 +83,7 @@ defmodule XmlBuilder do
     do: [indent(level), to_string(name)]
 
   defp format({name, attrs, content}, level) when is_blank_attrs(attrs) and is_blank_list(content),
-    do: [indent(level), '</', to_string(name), '>']
+    do: [indent(level), '<', to_string(name), '/>']
 
   defp format({name, attrs, content}, level) when is_blank_list(content),
     do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '/>']

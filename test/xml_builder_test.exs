@@ -5,7 +5,7 @@ defmodule XmlBuilderTest do
   import XmlBuilder, only: [doc: 1, doc: 2, doc: 3]
 
   test "empty element" do
-    assert doc(:person) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n</person>|
+    assert doc(:person) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
   end
 
   test "element with content" do
@@ -14,14 +14,14 @@ defmodule XmlBuilderTest do
 
   test "element with attributes" do
     assert doc(:person, %{occupation: "Developer", city: "Montreal"}) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer"/>|
-    assert doc(:person, %{}) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n</person>|
+    assert doc(:person, %{}) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
   end
 
   test "element with attributes and content" do
     assert doc(:person, %{occupation: "Developer", city: "Montreal"}, "Josh") == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer">Josh</person>|
     assert doc(:person, %{occupation: "Developer", city: "Montreal"}, nil) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer"/>|
     assert doc(:person, %{}, "Josh") == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>Josh</person>|
-    assert doc(:person, %{}, nil) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n</person>|
+    assert doc(:person, %{}, nil) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
   end
 
   test "element with children" do
