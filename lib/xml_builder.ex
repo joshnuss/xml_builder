@@ -25,6 +25,19 @@ defmodule XmlBuilder do
     quote do: is_nil(unquote(list)) or (is_list(unquote(list)) and length(unquote(list)) == 0)
   end
 
+  @indent "\t"
+  @crlf "\n"
+  @bit_crlf '\n'
+  @blank ""
+  @bit_blank ''
+
+  defp squeeze? do
+    Application.get_env(:xml_builder, :squeeze, false)
+  end
+
+  defp intesperser, do: if squeeze?(), do: @blank, else: @crlf
+  defp bit_intesperser, do: if squeeze?(), do: @bit_blank, else: @bit_crlf
+
   @doc """
   Generate an XML document.
 
@@ -131,8 +144,10 @@ defmodule XmlBuilder do
   defp format(string, level) when is_bitstring(string),
     do: format({nil, nil, string}, level)
 
-  defp format(list, level) when is_list(list),
-    do: list |> Enum.map(&format(&1, level)) |> Enum.intersperse("\n")
+  defp format(list, level) when is_list(list) do
+    result = list |> Enum.map(&format(&1, level))
+    if squeeze?(), do: result, else: Enum.intersperse(result, @crlf)
+  end
 
   defp format({nil, nil, name}, level) when is_bitstring(name),
     do: [indent(level), to_string(name)]
@@ -147,19 +162,19 @@ defmodule XmlBuilder do
     do: [indent(level), '<', to_string(name), '>', format_content(content, level+1), '</', to_string(name), '>']
 
   defp format({name, attrs, content}, level) when is_blank_attrs(attrs) and is_list(content),
-    do: [indent(level), '<', to_string(name), '>', format_content(content, level+1), '\n', indent(level), '</', to_string(name), '>']
+    do: [indent(level), '<', to_string(name), '>', format_content(content, level+1), bit_intesperser(), indent(level), '</', to_string(name), '>']
 
   defp format({name, attrs, content}, level) when not is_blank_attrs(attrs) and not is_list(content),
     do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1), '</', to_string(name), '>']
 
   defp format({name, attrs, content}, level) when not is_blank_attrs(attrs) and is_list(content),
-    do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1), '\n', indent(level), '</', to_string(name), '>']
+    do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1), bit_intesperser(), indent(level), '</', to_string(name), '>']
 
   defp tree_node(element_spec),
     do: element(element_spec)
 
   defp format_content(children, level) when is_list(children),
-    do: ['\n', Enum.map_join(children, "\n", &format(&1, level))]
+    do: [bit_intesperser(), Enum.map_join(children, intesperser(), &format(&1, level))]
 
   defp format_content(content, _level),
     do: escape(content)
@@ -168,7 +183,7 @@ defmodule XmlBuilder do
     do: Enum.map_join(attrs, " ", fn {name,value} -> [to_string(name), '=', quote_attribute_value(value)] end)
 
   defp indent(level),
-    do: String.duplicate("\t", level)
+    do: if squeeze?(), do: "", else: String.duplicate(@indent, level)
 
   defp quote_attribute_value(val) when not is_bitstring(val),
     do: quote_attribute_value(to_string(val))
