@@ -183,7 +183,7 @@ defmodule XmlBuilder do
     do: Enum.map_join(attrs, " ", fn {name,value} -> [to_string(name), '=', quote_attribute_value(value)] end)
 
   defp indent(level),
-    do: if squeeze?(), do: "", else: String.duplicate(@indent, level)
+    do: if squeeze?(), do: @blank, else: String.duplicate(@indent, level)
 
   defp quote_attribute_value(val) when not is_bitstring(val),
     do: quote_attribute_value(to_string(val))
