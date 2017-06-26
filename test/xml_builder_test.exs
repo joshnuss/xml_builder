@@ -2,7 +2,7 @@ defmodule XmlBuilderTest do
   use ExUnit.Case
   doctest XmlBuilder
 
-  import XmlBuilder, only: [doc: 1, doc: 2, doc: 3]
+  import XmlBuilder, only: [doc: 1, doc: 2, doc: 3, generate: 2]
 
   test "empty element" do
     assert doc(:person) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
@@ -64,11 +64,12 @@ defmodule XmlBuilderTest do
     assert doc([person: [first: "Josh", last: "Nussbaum"]]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n\t<first>Josh</first>\n\t<last>Nussbaum</last>\n</person>|
   end
 
-  @tag :squeezed
   test "squeezed content" do
-    Application.put_env(:xml_builder, :squeeze, true)
-    assert doc([{:person, %{}, [{:name, %{id: 123}, "Josh"}, {:age, %{}, "21"}]}]) == ~s|<?xml version="1.0" encoding="UTF-8"?><person><name id=\"123\">Josh</name><age>21</age></person>|
-    Application.put_env(:xml_builder, :squeeze, false)
+    assert generate(
+      [{:person, %{}, [{:name, %{id: 123}, "Josh"}, {:age, %{}, "21"}]}],
+      formatter: XmlBuilder.Formatters.Squeezed) ==
+
+      ~s|<person><name id=\"123\">Josh</name><age>21</age></person>|
   end
 
   def element(name, arg),

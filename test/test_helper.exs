@@ -1,1 +1,1 @@
-ExUnit.start(exclude: :squeezed)
+ExUnit.start()
