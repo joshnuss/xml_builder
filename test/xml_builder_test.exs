@@ -64,10 +64,18 @@ defmodule XmlBuilderTest do
     assert doc([person: [first: "Josh", last: "Nussbaum"]]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n\t<first>Josh</first>\n\t<last>Nussbaum</last>\n</person>|
   end
 
-  test "squeezed content" do
+  test "formatter: indented content" do
     assert generate(
       [{:person, %{}, [{:name, %{id: 123}, "Josh"}, {:age, %{}, "21"}]}],
-      formatter: XmlBuilder.Formatters.Squeezed) ==
+      formatter: XmlBuilder.Formatters.Indented) ==
+
+      ~s|<person>\n\t<name id=\"123\">Josh</name>\n\t<age>21</age>\n</person>|
+  end
+
+  test "formatter: none content" do
+    assert generate(
+      [{:person, %{}, [{:name, %{id: 123}, "Josh"}, {:age, %{}, "21"}]}],
+      formatter: XmlBuilder.Formatters.None) ==
 
       ~s|<person><name id=\"123\">Josh</name><age>21</age></person>|
   end

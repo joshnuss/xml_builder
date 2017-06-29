@@ -71,12 +71,15 @@ defmodule XmlBuilder do
   @spec element(name :: String.t | nil,
                 attrs :: Map.t | nil,
                 content :: Tuple.t | String.t | List.t | nil) :: XmlBuilder.Element.t
-  defdelegate element(a1), to: XmlBuilder.Element, as: :as_tuple
-  defdelegate element(a1, a2), to: XmlBuilder.Element, as: :as_tuple
-  defdelegate element(a1, a2, a3), to: XmlBuilder.Element, as: :as_tuple
+  defdelegate element(a1), to: XmlBuilder.Element, as: :to_element
+  defdelegate element(a1, a2), to: XmlBuilder.Element, as: :to_element
+  defdelegate element(a1, a2, a3), to: XmlBuilder.Element, as: :to_element
 
   @doc """
-  Generate a binary from an XML tree
+  Generate a binary from an XML tree. Accepts an optional parameter
+    `formatter: Formatter.Module.Name` to specify the formatter to use.
+  The `formatter` parameter might be shortened to `:none` and `:indented`
+    for built-in formatters.
 
   Returns a `binary`.
 
@@ -87,11 +90,35 @@ defmodule XmlBuilder do
 
       iex> XmlBuilder.generate({:person, %{id: 1}, "Steve Jobs"})
       "<person id=\\\"1\\\">Steve Jobs</person>"
+
+      iex> XmlBuilder.generate(
+      ...>  [{:person, %{},
+      ...>    [{:name, %{id: 123}, "Josh"},
+      ...>     {:age, %{}, "21"}]}], formatter: XmlBuilder.Formatters.None)
+      "<person><name id=\\\"123\\\">Josh</name><age>21</age></person>"
+
+      iex> XmlBuilder.generate(
+      ...>  [{:person, %{},
+      ...>    [{:name, %{id: 123}, "Josh"},
+      ...>     {:age, %{}, "21"}]}], formatter: :none)
+      "<person><name id=\\\"123\\\">Josh</name><age>21</age></person>"
   """
-  def generate(any, opts \\ [formatter: XmlBuilder.Formatters.Default]),
-    do: apply(opts[:formatter] || default(), :format, [any, 0]) |> IO.chardata_to_string
+  def generate(any, opts \\ [formatter: XmlBuilder.Formatters.Indented]),
+    do: apply(safe_formatter(opts[:formatter]), :format, [any, 0]) |> IO.chardata_to_string
 
-  defp default,
-    do: Application.get_env(:xml_builder, :formatter, XmlBuilder.Formatters.Default)
+  defp safe_formatter(name) when is_binary(name),
+    do: safe_formatter(String.to_atom(name))
 
+  defp safe_formatter([name]) when is_binary(name),
+    do: safe_formatter(Module.concat(["XmlBuilder", "Formatters", String.capitalize(name)]))
+
+  defp safe_formatter(name) when is_list(name),
+    do: safe_formatter(Application.get_env(:xml_builder, :formatter, XmlBuilder.Formatters.Indented))
+
+  defp safe_formatter(name) when is_atom(name) do
+    case Code.ensure_loaded(name) do
+      {:module, module} -> module
+      {:error, _reason} -> safe_formatter(name |> Atom.to_string() |> String.split("."))
+    end
+  end
 end

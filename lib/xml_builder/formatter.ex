@@ -1,4 +1,21 @@
 defmodule XmlBuilder.Formatter do
+  @moduledoc ~S"""
+  Base behaviour for all the formatters. There are two defauls formatters
+    included: `XmlBuilder.Formatters.None` and `XmlBuilder.Formatters.Indented`.
+
+  To introduce the new formatter, one should `use XmlBuilder.Formatter` and
+    possibly override `XmlBuilder.format/2` implementation:
+
+  ```elixir
+  defmodule MyCuteFormatter do
+    use XmlBuilder.Formatter, indent: "  ", intersperse: "\n"
+
+    def format(string, level) when is_bitstring(string) do
+      [String.duplicate(@indenter, level), "<![CDATA[#{string}]]>"]
+    end
+  end
+  ```
+  """
   @callback format(String.t | List.t | Tuple.t, Integer.t) :: String.t
 
   defmacro __using__(opts) do
@@ -16,7 +33,6 @@ defmodule XmlBuilder.Formatter do
       defmacrop is_blank_list(list) do
         quote do: is_nil(unquote(list)) or (is_list(unquote(list)) and length(unquote(list)) == 0)
       end
-
 
       def format(:_doc_type, 0),
         do: ~s|<?xml version="1.0" encoding="UTF-8"?>|
@@ -53,7 +69,6 @@ defmodule XmlBuilder.Formatter do
       def format({name, attrs, content}, level) when not is_blank_attrs(attrs) and is_list(content),
         do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1), intersperse(:bitstring), indent(level), '</', to_string(name), '>']
 
-
       defp format_content(children, level) when is_list(children),
         do: [intersperse(:bitstring), Enum.map_join(children, intersperse(:binary), &format(&1, level))]
 
@@ -62,7 +77,6 @@ defmodule XmlBuilder.Formatter do
 
       defp format_attributes(attrs),
         do: Enum.map_join(attrs, " ", fn {name,value} -> [to_string(name), '=', quote_attribute_value(value)] end)
-
 
       defp quote_attribute_value(val) when not is_bitstring(val),
         do: quote_attribute_value(to_string(val))
@@ -98,14 +112,13 @@ defmodule XmlBuilder.Formatter do
         Regex.replace(~r/&(?!lt;|gt;|quot;)/, string, "&amp;")
       end
 
-
       defp indent(level), do: String.duplicate(@indenter, level)
       defp intersperse(:binary), do: @intersperser
       defp intersperse(:bitstring), do: to_charlist(@intersperser)
       defp blank(:binary), do: @blanker
       defp blank(:bitstring), do: to_charlist(@blanker)
 
-      defoverridable [indent: 1, intersperse: 1]
+      defoverridable [indent: 1, intersperse: 1, format: 2]
     end
   end
 

@@ -11,39 +11,39 @@ defmodule XmlBuilder.Element do
 
   def to_tuple(element), do: {element.name, element.attrs, element.content}
 
-  def as_tuple(name) when is_bitstring(name),
-    do: as_tuple({nil, nil, name})
+  def to_element(name) when is_bitstring(name),
+    do: to_element({nil, nil, name})
 
-  def as_tuple(name) when is_bitstring(name) or is_atom(name),
-    do: as_tuple({name})
+  def to_element(name) when is_bitstring(name) or is_atom(name),
+    do: to_element({name})
 
-  def as_tuple({name}),
-    do: as_tuple({name, nil, nil})
+  def to_element({name}),
+    do: to_element({name, nil, nil})
 
-  def as_tuple({name, %{} = attrs}),
-    do: as_tuple({name, attrs, nil})
+  def to_element({name, %{} = attrs}),
+    do: to_element({name, attrs, nil})
 
-  def as_tuple({name, content}),
-    do: as_tuple({name, nil, content})
+  def to_element({name, content}),
+    do: to_element({name, nil, content})
 
-  def as_tuple(name, %{} = attrs),
-    do: as_tuple({name, attrs, nil})
+  def to_element(name, %{} = attrs),
+    do: to_element({name, attrs, nil})
 
-  def as_tuple(name, content),
-    do: as_tuple({name, nil, content})
+  def to_element(name, content),
+    do: to_element({name, nil, content})
 
-  def as_tuple(name, attrs, content),
-    do: as_tuple({name, attrs, content})
+  def to_element(name, attrs, content),
+    do: to_element({name, attrs, content})
 
-  def as_tuple(list) when is_list(list),
-    do: Enum.map(list, &as_tuple/1)
+  def to_element(list) when is_list(list),
+    do: Enum.map(list, &to_element/1)
 
-  def as_tuple({name, attrs, content}) when is_list(content) do
-    %XmlBuilder.Element{name: name, attrs: attrs, content: Enum.map(content, &as_tuple/1)}
+  def to_element({name, attrs, content}) when is_list(content) do
+    %XmlBuilder.Element{name: name, attrs: attrs, content: Enum.map(content, &to_element/1)}
     |> XmlBuilder.Element.to_tuple()
   end
 
-  def as_tuple({name, attrs, content}) do
+  def to_element({name, attrs, content}) do
     %XmlBuilder.Element{name: name, attrs: attrs, content: content}
     |> XmlBuilder.Element.to_tuple()
   end
