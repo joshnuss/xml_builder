@@ -41,15 +41,14 @@ defmodule XmlBuilder do
       iex> XmlBuilder.doc(:person, %{id: 1}, "some data")
       "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<person id=\\\"1\\\">some data</person>"
   """
-
   def doc(name_or_tuple),
-    do: [:_doc_type | tree_node(name_or_tuple) |> List.wrap] |> generate
+    do: [:xml_decl | tree_node(name_or_tuple) |> List.wrap] |> generate
 
   def doc(name, attrs_or_content),
-    do: [:_doc_type | [element(name, attrs_or_content)]] |> generate
+    do: [:xml_decl | [element(name, attrs_or_content)]] |> generate
 
   def doc(name, attrs, content),
-    do: [:_doc_type | [element(name, attrs, content)]] |> generate
+    do: [:xml_decl | [element(name, attrs, content)]] |> generate
 
   @doc """
   Create an XML element.
@@ -125,7 +124,7 @@ defmodule XmlBuilder do
   def generate(any),
     do: format(any, 0) |> IO.chardata_to_string
 
-  defp format(:_doc_type, 0),
+  defp format(:xml_decl, 0),
     do: ~s|<?xml version="1.0" encoding="UTF-8"?>|
 
   defp format(string, level) when is_bitstring(string),
