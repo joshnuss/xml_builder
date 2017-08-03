@@ -120,7 +120,7 @@ Outputs
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE greeting SYSTEM \"hello.dtd\">
+<!DOCTYPE greeting SYSTEM "hello.dtd">
 <person>Josh</person>
 ```
 
