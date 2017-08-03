@@ -2,10 +2,21 @@ defmodule XmlBuilderTest do
   use ExUnit.Case
   doctest XmlBuilder
 
-  import XmlBuilder, only: [doc: 1, doc: 2, doc: 3]
+  import XmlBuilder, only: [doc: 1, doc: 2, doc: 3, doctype: 2]
 
   test "empty element" do
     assert doc(:person) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
+  end
+
+  test "document with DOCTYPE declaration and a system identifier" do
+    assert doc([doctype("greeting", system: "hello.dtd"), {:greeting, "Hello, world!"}]) == 
+            ~s|<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE greeting SYSTEM "hello.dtd">\n<greeting>Hello, world!</greeting>|
+  end
+
+  test "document with DOCTYPE declaration and a public identifier" do
+    assert doc([doctype("html", public: ["-//W3C//DTD XHTML 1.0 Transitional//EN",
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]), {:html, "Hello, world!"}]) == 
+            ~s|<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n<html>Hello, world!</html>|
   end
 
   test "element with content" do
