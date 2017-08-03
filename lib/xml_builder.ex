@@ -111,7 +111,26 @@ defmodule XmlBuilder do
   @doc """
   Creates a DOCTYPE declaration with a system identifier.
 
-  Returns a `tuple` in the format `{:doctype, [:system, name, system_identifier}`.  
+  Returns a `tuple` in the format `{:doctype, [:system, name, system_identifier}`.
+
+  ## Example
+
+  ```elixir
+  import XmlBuilder
+
+  doc([
+    doctype("greeting", system: "hello.dtd"),
+    element(:person, "Josh")
+  ])
+  ```
+
+  Outputs
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8" ?>
+  <!DOCTYPE greeting SYSTEM "hello.dtd">
+  <person>Josh</person>
+  ```
   """
   def doctype(name, [{:system, system_identifier}]),
     do: {:doctype, [:system, name, system_identifier]}
@@ -120,6 +139,26 @@ defmodule XmlBuilder do
   Creates a DOCTYPE declaration with a public identifier.
 
   Returns a `tuple` in the format `{:doctype, [:public, name, public_identifier, system_identifier}`.  
+
+  ## Example
+
+  ```elixir
+  import XmlBuilder
+
+  doc([
+    doctype("html", public: ["-//W3C//DTD XHTML 1.0 Transitional//EN",
+                  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]), 
+    element(:html, "Hello, world!")
+  ])
+  ```
+
+  Outputs
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  <html>Hello, world!</html>
+  ```
   """
   def doctype(name, [{:public, [public_identifier, system_identifier]}]),
     do: {:doctype, [:public, name, public_identifier, system_identifier]}

@@ -111,25 +111,6 @@ A DOCTYPE can be declared by applying the `doctype` function at the first positi
 import XmlBuilder
 
 doc([
-  doctype("greeting", system: "hello.dtd"),
-  element(:person, "Josh")
-])
-```
-
-Outputs
-
-```xml
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE greeting SYSTEM "hello.dtd">
-<person>Josh</person>
-```
-
-Alternatively with a public identifier:
-
-```elixir
-import XmlBuilder
-
-doc([
   doctype("html", public: ["-//W3C//DTD XHTML 1.0 Transitional//EN",
                 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]), 
   element(:html, "Hello, world!")
