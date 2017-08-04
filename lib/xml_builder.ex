@@ -133,7 +133,7 @@ defmodule XmlBuilder do
   ```
   """
   def doctype(name, [{:system, system_identifier}]),
-    do: {:doctype, [:system, name, system_identifier]}
+    do: {:doctype, {:system, name, system_identifier}}
 
   @doc """
   Creates a DOCTYPE declaration with a public identifier.
@@ -161,7 +161,7 @@ defmodule XmlBuilder do
   ```
   """
   def doctype(name, [{:public, [public_identifier, system_identifier]}]),
-    do: {:doctype, [:public, name, public_identifier, system_identifier]}
+    do: {:doctype, {:public, name, public_identifier, system_identifier}}
 
   @doc """
   Generate a binary from an XML tree
@@ -182,10 +182,10 @@ defmodule XmlBuilder do
   defp format(:xml_decl, 0),
     do: ~s|<?xml version="1.0" encoding="UTF-8"?>|
 
-  defp format({:doctype, [:system, name, system]}, 0),
+  defp format({:doctype, {:system, name, system}}, 0),
     do: ['<!DOCTYPE ', to_string(name), ' SYSTEM "', to_string(system), '">']
 
-  defp format({:doctype, [:public, name, public, system]}, 0),
+  defp format({:doctype, {:public, name, public, system}}, 0),
     do: ['<!DOCTYPE ', to_string(name), ' PUBLIC "', to_string(public), '" "', to_string(system), '">']
     
   defp format(string, level) when is_bitstring(string),
@@ -221,7 +221,7 @@ defmodule XmlBuilder do
   defp elements_with_prolog(element_spec),
     do: element(element_spec)
 
-  defp first_element({:doctype, args} = doctype_decl) when is_list(args),
+  defp first_element({:doctype, args} = doctype_decl) when is_tuple(args),
     do: doctype_decl
 
   defp first_element(element_spec),
