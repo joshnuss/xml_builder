@@ -41,15 +41,14 @@ defmodule XmlBuilder do
       iex> XmlBuilder.doc(:person, %{id: 1}, "some data")
       "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<person id=\\\"1\\\">some data</person>"
   """
-
-  def doc(name_or_tuple),
-    do: [:_doc_type | tree_node(name_or_tuple) |> List.wrap] |> generate
+  def doc(elements),
+    do: [:xml_decl | elements_with_prolog(elements) |> List.wrap] |> generate
 
   def doc(name, attrs_or_content),
-    do: [:_doc_type | [element(name, attrs_or_content)]] |> generate
+    do: [:xml_decl | [element(name, attrs_or_content)]] |> generate
 
   def doc(name, attrs, content),
-    do: [:_doc_type | [element(name, attrs, content)]] |> generate
+    do: [:xml_decl | [element(name, attrs, content)]] |> generate
 
   @doc """
   Create an XML element.
@@ -95,7 +94,7 @@ defmodule XmlBuilder do
     do: element({name, nil, content})
 
   def element({name, attrs, content}) when is_list(content),
-    do: {name, attrs, Enum.map(content, &tree_node/1)}
+    do: {name, attrs, Enum.map(content, &element/1)}
 
   def element({name, attrs, content}),
     do: {name, attrs, content}
@@ -108,6 +107,61 @@ defmodule XmlBuilder do
 
   def element(name, attrs, content),
     do: element({name, attrs, content})
+
+  @doc """
+  Creates a DOCTYPE declaration with a system identifier.
+
+  Returns a `tuple` in the format `{:doctype, [:system, name, system_identifier}`.
+
+  ## Example
+
+  ```elixir
+  import XmlBuilder
+
+  doc([
+    doctype("greeting", system: "hello.dtd"),
+    element(:person, "Josh")
+  ])
+  ```
+
+  Outputs
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8" ?>
+  <!DOCTYPE greeting SYSTEM "hello.dtd">
+  <person>Josh</person>
+  ```
+  """
+  def doctype(name, [{:system, system_identifier}]),
+    do: {:doctype, {:system, name, system_identifier}}
+
+  @doc """
+  Creates a DOCTYPE declaration with a public identifier.
+
+  Returns a `tuple` in the format `{:doctype, [:public, name, public_identifier, system_identifier}`.  
+
+  ## Example
+
+  ```elixir
+  import XmlBuilder
+
+  doc([
+    doctype("html", public: ["-//W3C//DTD XHTML 1.0 Transitional//EN",
+                  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]), 
+    element(:html, "Hello, world!")
+  ])
+  ```
+
+  Outputs
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  <html>Hello, world!</html>
+  ```
+  """
+  def doctype(name, [{:public, [public_identifier, system_identifier]}]),
+    do: {:doctype, {:public, name, public_identifier, system_identifier}}
 
   @doc """
   Generate a binary from an XML tree
@@ -125,9 +179,15 @@ defmodule XmlBuilder do
   def generate(any),
     do: format(any, 0) |> IO.chardata_to_string
 
-  defp format(:_doc_type, 0),
+  defp format(:xml_decl, 0),
     do: ~s|<?xml version="1.0" encoding="UTF-8"?>|
 
+  defp format({:doctype, {:system, name, system}}, 0),
+    do: ['<!DOCTYPE ', to_string(name), ' SYSTEM "', to_string(system), '">']
+
+  defp format({:doctype, {:public, name, public, system}}, 0),
+    do: ['<!DOCTYPE ', to_string(name), ' PUBLIC "', to_string(public), '" "', to_string(system), '">']
+    
   defp format(string, level) when is_bitstring(string),
     do: format({nil, nil, string}, level)
 
@@ -155,7 +215,16 @@ defmodule XmlBuilder do
   defp format({name, attrs, content}, level) when not is_blank_attrs(attrs) and is_list(content),
     do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1), '\n', indent(level), '</', to_string(name), '>']
 
-  defp tree_node(element_spec),
+  defp elements_with_prolog([first | rest]) when length(rest) > 0,
+    do: [first_element(first) |element(rest)]
+
+  defp elements_with_prolog(element_spec),
+    do: element(element_spec)
+
+  defp first_element({:doctype, args} = doctype_decl) when is_tuple(args),
+    do: doctype_decl
+
+  defp first_element(element_spec),
     do: element(element_spec)
 
   defp format_content(children, level) when is_list(children),

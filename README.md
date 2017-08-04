@@ -102,3 +102,25 @@ end
 iex> person(123, "Josh", "Nussbaum") |> generate
 "<person id=\"123\"><first>Josh</first><last>Nussbaum</last></person>"
 ```
+
+### DOCTYPE declarations
+
+A DOCTYPE can be declared by applying the `doctype` function at the first position of a list of elements in a `doc` definition:
+
+```elixir
+import XmlBuilder
+
+doc([
+  doctype("html", public: ["-//W3C//DTD XHTML 1.0 Transitional//EN",
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]), 
+  element(:html, "Hello, world!")
+])
+```
+
+Outputs
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>Hello, world!</html>
+```
