@@ -18,11 +18,15 @@ defmodule XmlBuilder do
   """
 
   defmacrop is_blank_attrs(attrs) do
-    quote do: is_nil(unquote(attrs)) or map_size(unquote(attrs)) == 0
+    quote do: is_blank_map(unquote(attrs)) or is_blank_list(unquote(attrs))
   end
 
   defmacrop is_blank_list(list) do
     quote do: is_nil(unquote(list)) or (is_list(unquote(list)) and length(unquote(list)) == 0)
+  end
+
+  defmacrop is_blank_map(map) do
+    quote do: is_nil(unquote(map)) or (is_map(unquote(map)) and map_size(unquote(map)) == 0)
   end
 
   @doc """
