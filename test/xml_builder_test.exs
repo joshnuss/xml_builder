@@ -35,6 +35,14 @@ defmodule XmlBuilderTest do
     assert doc(:person, %{}, nil) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
   end
 
+  test "element with ordered attributes" do
+    assert doc(:person, [occupation: "Developer", city: "Montreal"], "Josh") == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person occupation="Developer" city="Montreal">Josh</person>|
+    assert doc(:person, [occupation: "Developer", city: "Montreal"], nil) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person occupation="Developer" city="Montreal"/>|
+    assert doc(:person, [occupation: "Developer", city: "Montreal"], nil) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person occupation="Developer" city="Montreal"/>|
+    assert doc(:person, [], "Josh") == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>Josh</person>|
+    assert doc(:person, [], nil) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
+  end
+
   test "element with children" do
     assert doc(:person, [{:name, %{id: 123}, "Josh"}]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n\t<name id="123">Josh</name>\n</person>|
     assert doc(:person, [{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n\t<first_name>Josh</first_name>\n\t<last_name>Nussbaum</last_name>\n</person>|
