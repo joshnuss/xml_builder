@@ -45,14 +45,15 @@ defmodule XmlBuilder do
       iex> XmlBuilder.doc(:person, %{id: 1}, "some data")
       "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<person id=\\\"1\\\">some data</person>"
   """
-  def doc(elements, options \\ []),
-    do: [:xml_decl | elements_with_prolog(elements) |> List.wrap] |> generate(options)
+  def doc(elements),
+    do: [:xml_decl | elements_with_prolog(elements) |> List.wrap] |> generate
 
-  def doc(name, attrs_or_content, options \\ []) when is_list(options),
-    do: [:xml_decl | [element(name, attrs_or_content)]] |> generate(options)
+  def doc(name, attrs_or_content),
+    do: [:xml_decl | [element(name, attrs_or_content)]] |> generate
 
-  def doc(name, attrs, content, options \\ []),
-    do: [:xml_decl | [element(name, attrs, content)]] |> generate(options)
+
+  def doc(name, attrs, content),
+    do: [:xml_decl | [element(name, attrs, content)]] |> generate
 
   @doc """
   Create an XML element.
