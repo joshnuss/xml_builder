@@ -9,14 +9,22 @@ defmodule XmlBuilderTest do
   end
 
   test "document with DOCTYPE declaration and a system identifier" do
-    assert doc([doctype("greeting", system: "hello.dtd"), {:greeting, "Hello, world!"}]) == 
+    assert doc([doctype("greeting", system: "hello.dtd"), {:greeting, "Hello, world!"}]) ==
             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE greeting SYSTEM "hello.dtd">\n<greeting>Hello, world!</greeting>|
   end
 
   test "document with DOCTYPE declaration and a public identifier" do
     assert doc([doctype("html", public: ["-//W3C//DTD XHTML 1.0 Transitional//EN",
-                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]), {:html, "Hello, world!"}]) == 
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]), {:html, "Hello, world!"}]) ==
             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n<html>Hello, world!</html>|
+  end
+
+  describe "options" do
+    test "when ident = false, tab formatting is not used" do
+      input = {:level1, nil, [{:level2, nil, "test_value"}]}
+      expectation = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<level1>\n<level2>test_value</level2>\n</level1>"
+      assert doc(input) == expectation
+    end
   end
 
   test "element with content" do
