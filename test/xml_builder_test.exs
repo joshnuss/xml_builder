@@ -19,11 +19,18 @@ defmodule XmlBuilderTest do
             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n<html>Hello, world!</html>|
   end
 
-  describe "#generate options" do
-    test "when ident = false, tab formatting is not used" do
-      input = {:level1, nil, [{:level2, nil, "test_value"}]}
+  describe "#generate with options" do
+    defp input,
+      do: {:level1, nil, [{:level2, nil, "test_value"}]}
+
+    test "when format = none, tab and nl formatting is not used" do
+      expectation = "<level1><level2>test_value</level2></level1>"
+      assert XmlBuilder.generate(input, format: :none) == expectation
+    end
+
+    test "identation character option is used" do
       expectation = "<level1>\n<level2>test_value</level2>\n</level1>"
-      assert XmlBuilder.generate(input, indent: false) == expectation
+      assert XmlBuilder.generate(input, indentation: "") == expectation
     end
   end
 

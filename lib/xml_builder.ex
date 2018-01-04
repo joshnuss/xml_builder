@@ -51,7 +51,6 @@ defmodule XmlBuilder do
   def doc(name, attrs_or_content),
     do: [:xml_decl | [element(name, attrs_or_content)]] |> generate
 
-
   def doc(name, attrs, content),
     do: [:xml_decl | [element(name, attrs, content)]] |> generate
 
@@ -180,6 +179,12 @@ defmodule XmlBuilder do
 
       iex> XmlBuilder.generate({:person, %{id: 1}, "Steve Jobs"})
       "<person id=\\\"1\\\">Steve Jobs</person>"
+
+      iex> XmlBuilder.generate({:name, nil, [{:first, nil, "Steve"}]}, format: :none)
+      "<name><first>Steve</first></name>"
+
+      iex> XmlBuilder.generate({:name, nil, [{:first, nil, "Steve"}]}, indentation: "")
+      "<name>\\n<first>Steve</first>\\n</name>"
   """
   def generate(any, options \\ []),
     do: format(any, 0, options) |> IO.chardata_to_string
@@ -196,8 +201,10 @@ defmodule XmlBuilder do
   defp format(string, level, options) when is_bitstring(string),
     do: format({nil, nil, string}, level, options)
 
-  defp format(list, level, options) when is_list(list),
-    do: list |> Enum.map(&format(&1, level, options)) |> Enum.intersperse("\n")
+  defp format(list, level, options) when is_list(list) do
+    format_char = format_char(options)
+    list |> Enum.map(&format(&1, level, options)) |> Enum.intersperse(format_char)
+  end
 
   defp format({nil, nil, name}, level, options) when is_bitstring(name),
     do: [indent(level, options), to_string(name)]
@@ -212,13 +219,13 @@ defmodule XmlBuilder do
     do: [indent(level, options), '<', to_string(name), '>', format_content(content, level+1, options), '</', to_string(name), '>']
 
   defp format({name, attrs, content}, level, options) when is_blank_attrs(attrs) and is_list(content),
-    do: [indent(level, options), '<', to_string(name), '>', format_content(content, level+1, options), '\n', indent(level, options), '</', to_string(name), '>']
+    do: [indent(level, options), '<', to_string(name), '>', format_content(content, level+1, options), format_char(options), indent(level, options), '</', to_string(name), '>']
 
   defp format({name, attrs, content}, level, options) when not is_blank_attrs(attrs) and not is_list(content),
     do: [indent(level, options), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1, options), '</', to_string(name), '>']
 
   defp format({name, attrs, content}, level, options) when not is_blank_attrs(attrs) and is_list(content),
-    do: [indent(level, options), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1, options), '\n', indent(level, options), '</', to_string(name), '>']
+    do: [indent(level, options), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1, options), format_char(options), indent(level, options), '</', to_string(name), '>']
 
   defp elements_with_prolog([first | rest]) when length(rest) > 0,
     do: [first_element(first) |element(rest)]
@@ -232,20 +239,34 @@ defmodule XmlBuilder do
   defp first_element(element_spec),
     do: element(element_spec)
 
-  defp format_content(children, level, options) when is_list(children),
-    do: ['\n', Enum.map_join(children, "\n", &format(&1, level, options))]
+  defp format_char(options) do
+    if Keyword.get(options, :format) == :none do
+      ""
+    else
+      "\n"
+    end
+  end
 
-  defp format_content(content, _level, options),
+  defp format_content(children, level, options) when is_list(children) do
+    format_char = format_char(options)
+    [format_char, Enum.map_join(children, format_char, &format(&1, level, options))]
+  end
+
+  defp format_content(content, _level, _options),
     do: escape(content)
 
   defp format_attributes(attrs),
     do: Enum.map_join(attrs, " ", fn {name,value} -> [to_string(name), '=', quote_attribute_value(value)] end)
 
-  defp indent(_, [indent: false]),
-    do: ""
+  defp indent(level, options) do
+    indent_char =
+      case Keyword.get(options, :format) do
+        :none -> ""
+        _     -> Keyword.get(options, :indentation, "\t")
+      end
 
-  defp indent(level, options),
-    do: String.duplicate("\t", level)
+    String.duplicate(indent_char, level)
+  end
 
   defp quote_attribute_value(val) when not is_bitstring(val),
     do: quote_attribute_value(to_string(val))
