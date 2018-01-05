@@ -28,9 +28,9 @@ defmodule XmlBuilderTest do
       assert XmlBuilder.generate(input, format: :none) == expectation
     end
 
-    test "identation character option is used" do
-      expectation = "<level1>\n<level2>test_value</level2>\n</level1>"
-      assert XmlBuilder.generate(input, indentation: "") == expectation
+    test "whitespace character option is used" do
+      expectation = "<level1>\n\t<level2>test_value</level2>\n</level1>"
+      assert XmlBuilder.generate(input, whitespace: "\t") == expectation
     end
   end
 
@@ -59,17 +59,17 @@ defmodule XmlBuilderTest do
   end
 
   test "element with children" do
-    assert doc(:person, [{:name, %{id: 123}, "Josh"}]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n\t<name id="123">Josh</name>\n</person>|
-    assert doc(:person, [{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n\t<first_name>Josh</first_name>\n\t<last_name>Nussbaum</last_name>\n</person>|
+    assert doc(:person, [{:name, %{id: 123}, "Josh"}]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n  <name id="123">Josh</name>\n</person>|
+    assert doc(:person, [{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n  <first_name>Josh</first_name>\n  <last_name>Nussbaum</last_name>\n</person>|
   end
 
   test "element with attributes and children" do
-    assert doc(:person, %{id: 123}, [{:name, "Josh"}]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person id="123">\n\t<name>Josh</name>\n</person>|
-    assert doc(:person, %{id: 123}, [{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person id="123">\n\t<first_name>Josh</first_name>\n\t<last_name>Nussbaum</last_name>\n</person>|
+    assert doc(:person, %{id: 123}, [{:name, "Josh"}]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person id="123">\n  <name>Josh</name>\n</person>|
+    assert doc(:person, %{id: 123}, [{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person id="123">\n  <first_name>Josh</first_name>\n  <last_name>Nussbaum</last_name>\n</person>|
   end
 
   test "element with text content" do
-    assert doc(:person, ["TextNode", {:name, %{id: 123}, "Josh"}, "TextNode"]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n\tTextNode\n\t<name id="123">Josh</name>\n\tTextNode\n</person>|
+    assert doc(:person, ["TextNode", {:name, %{id: 123}, "Josh"}, "TextNode"]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n  TextNode\n  <name id="123">Josh</name>\n  TextNode\n</person>|
   end
 
   test "children elements" do
@@ -95,7 +95,7 @@ defmodule XmlBuilderTest do
   end
 
   test "multi level indentation" do
-    assert doc([person: [first: "Josh", last: "Nussbaum"]]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n\t<first>Josh</first>\n\t<last>Nussbaum</last>\n</person>|
+    assert doc([person: [first: "Josh", last: "Nussbaum"]]) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n  <first>Josh</first>\n  <last>Nussbaum</last>\n</person>|
   end
 
   def element(name, arg),
