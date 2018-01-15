@@ -124,3 +124,12 @@ Outputs
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>Hello, world!</html>
 ```
+
+### Formatting
+
+With indentation: `XmlBuilder.generate(doc, format: :indent)`
+Without indentation: `XmlBuilder.generate(doc, format: :none)`
+
+## License
+
+MIT
