@@ -25,12 +25,12 @@ defmodule XmlBuilderTest do
 
     test "when format = none, tab and nl formatting is not used" do
       expectation = "<level1><level2>test_value</level2></level1>"
-      assert XmlBuilder.generate(input, format: :none) == expectation
+      assert XmlBuilder.generate(input(), format: :none) == expectation
     end
 
     test "whitespace character option is used" do
       expectation = "<level1>\n\t<level2>test_value</level2>\n</level1>"
-      assert XmlBuilder.generate(input, whitespace: "\t") == expectation
+      assert XmlBuilder.generate(input(), whitespace: "\t") == expectation
     end
   end
 

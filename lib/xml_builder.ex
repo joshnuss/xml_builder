@@ -192,13 +192,13 @@ defmodule XmlBuilder do
   def generate(any, options \\ []),
     do: format(any, 0, options) |> IO.chardata_to_string
 
-  defp format(:xml_decl, 0, options),
+  defp format(:xml_decl, 0, _options),
     do: ~s|<?xml version="1.0" encoding="UTF-8"?>|
 
-  defp format({:doctype, {:system, name, system}}, 0, options),
+  defp format({:doctype, {:system, name, system}}, 0, _options),
     do: ['<!DOCTYPE ', to_string(name), ' SYSTEM "', to_string(system), '">']
 
-  defp format({:doctype, {:public, name, public, system}}, 0, options),
+  defp format({:doctype, {:public, name, public, system}}, 0, _options),
     do: ['<!DOCTYPE ', to_string(name), ' PUBLIC "', to_string(public), '" "', to_string(system), '">']
 
   defp format(string, level, options) when is_bitstring(string),
