@@ -142,7 +142,7 @@ defmodule XmlBuilder do
   @doc """
   Creates a DOCTYPE declaration with a public identifier.
 
-  Returns a `tuple` in the format `{:doctype, [:public, name, public_identifier, system_identifier}`.  
+  Returns a `tuple` in the format `{:doctype, [:public, name, public_identifier, system_identifier}`.
 
   ## Example
 
@@ -151,7 +151,7 @@ defmodule XmlBuilder do
 
   doc([
     doctype("html", public: ["-//W3C//DTD XHTML 1.0 Transitional//EN",
-                  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]), 
+                  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]),
     element(:html, "Hello, world!")
   ])
   ```
@@ -179,45 +179,60 @@ defmodule XmlBuilder do
 
       iex> XmlBuilder.generate({:person, %{id: 1}, "Steve Jobs"})
       "<person id=\\\"1\\\">Steve Jobs</person>"
-  """
-  def generate(any),
-    do: format(any, 0) |> IO.chardata_to_string
 
-  defp format(:xml_decl, 0),
+      iex> XmlBuilder.generate({:name, nil, [{:first, nil, "Steve"}]}, format: :none)
+      "<name><first>Steve</first></name>"
+
+      iex> XmlBuilder.generate({:name, nil, [{:first, nil, "Steve"}]}, whitespace: "")
+      "<name>\\n<first>Steve</first>\\n</name>"
+
+      iex> XmlBuilder.generate({:name, nil, [{:first, nil, "Steve"}]})
+      "<name>\\n  <first>Steve</first>\\n</name>"
+  """
+  def generate(any, options \\ []),
+    do: format(any, 0, options) |> IO.chardata_to_string
+
+  defp format(:xml_decl, 0, options),
     do: ~s|<?xml version="1.0" encoding="UTF-8"?>|
 
-  defp format({:doctype, {:system, name, system}}, 0),
+  defp format({:doctype, {:system, name, system}}, 0, options),
     do: ['<!DOCTYPE ', to_string(name), ' SYSTEM "', to_string(system), '">']
 
-  defp format({:doctype, {:public, name, public, system}}, 0),
+  defp format({:doctype, {:public, name, public, system}}, 0, options),
     do: ['<!DOCTYPE ', to_string(name), ' PUBLIC "', to_string(public), '" "', to_string(system), '">']
-    
-  defp format(string, level) when is_bitstring(string),
-    do: format({nil, nil, string}, level)
 
-  defp format(list, level) when is_list(list),
-    do: list |> Enum.map(&format(&1, level)) |> Enum.intersperse("\n")
+  defp format(string, level, options) when is_bitstring(string),
+    do: format({nil, nil, string}, level, options)
 
-  defp format({nil, nil, name}, level) when is_bitstring(name),
-    do: [indent(level), to_string(name)]
+  defp format(list, level, options) when is_list(list) do
+    formatter = formatter(options)
+    list |> Enum.map(&format(&1, level, options)) |> Enum.intersperse(formatter.line_break())
+  end
 
-  defp format({name, attrs, content}, level) when is_blank_attrs(attrs) and is_blank_list(content),
-    do: [indent(level), '<', to_string(name), '/>']
+  defp format({nil, nil, name}, level, options) when is_bitstring(name),
+    do: [indent(level, options), to_string(name)]
 
-  defp format({name, attrs, content}, level) when is_blank_list(content),
-    do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '/>']
+  defp format({name, attrs, content}, level, options) when is_blank_attrs(attrs) and is_blank_list(content),
+    do: [indent(level, options), '<', to_string(name), '/>']
 
-  defp format({name, attrs, content}, level) when is_blank_attrs(attrs) and not is_list(content),
-    do: [indent(level), '<', to_string(name), '>', format_content(content, level+1), '</', to_string(name), '>']
+  defp format({name, attrs, content}, level, options) when is_blank_list(content),
+    do: [indent(level, options), '<', to_string(name), ' ', format_attributes(attrs), '/>']
 
-  defp format({name, attrs, content}, level) when is_blank_attrs(attrs) and is_list(content),
-    do: [indent(level), '<', to_string(name), '>', format_content(content, level+1), '\n', indent(level), '</', to_string(name), '>']
+  defp format({name, attrs, content}, level, options) when is_blank_attrs(attrs) and not is_list(content),
+    do: [indent(level, options), '<', to_string(name), '>', format_content(content, level+1, options), '</', to_string(name), '>']
 
-  defp format({name, attrs, content}, level) when not is_blank_attrs(attrs) and not is_list(content),
-    do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1), '</', to_string(name), '>']
+  defp format({name, attrs, content}, level, options) when is_blank_attrs(attrs) and is_list(content) do
+    format_char = formatter(options).line_break()
+    [indent(level, options), '<', to_string(name), '>', format_content(content, level+1, options), format_char, indent(level, options), '</', to_string(name), '>']
+  end
 
-  defp format({name, attrs, content}, level) when not is_blank_attrs(attrs) and is_list(content),
-    do: [indent(level), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1), '\n', indent(level), '</', to_string(name), '>']
+  defp format({name, attrs, content}, level, options) when not is_blank_attrs(attrs) and not is_list(content),
+    do: [indent(level, options), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1, options), '</', to_string(name), '>']
+
+  defp format({name, attrs, content}, level, options) when not is_blank_attrs(attrs) and is_list(content) do
+    format_char = formatter(options).line_break()
+    [indent(level, options), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1, options), format_char, indent(level, options), '</', to_string(name), '>']
+  end
 
   defp elements_with_prolog([first | rest]) when length(rest) > 0,
     do: [first_element(first) |element(rest)]
@@ -231,17 +246,28 @@ defmodule XmlBuilder do
   defp first_element(element_spec),
     do: element(element_spec)
 
-  defp format_content(children, level) when is_list(children),
-    do: ['\n', Enum.map_join(children, "\n", &format(&1, level))]
+  defp formatter(options) do
+    case Keyword.get(options, :format) do
+      :none -> XmlBuilder.Format.None
+      _     -> XmlBuilder.Format.Indented
+    end
+  end
 
-  defp format_content(content, _level),
+  defp format_content(children, level, options) when is_list(children) do
+    format_char = formatter(options).line_break()
+    [format_char, Enum.map_join(children, format_char, &format(&1, level, options))]
+  end
+
+  defp format_content(content, _level, _options),
     do: escape(content)
 
   defp format_attributes(attrs),
     do: Enum.map_join(attrs, " ", fn {name,value} -> [to_string(name), '=', quote_attribute_value(value)] end)
 
-  defp indent(level),
-    do: String.duplicate("\t", level)
+  defp indent(level, options) do
+    formatter = formatter(options)
+    formatter.indentation(level, options)
+  end
 
   defp quote_attribute_value(val) when not is_bitstring(val),
     do: quote_attribute_value(to_string(val))
