@@ -64,11 +64,13 @@ defmodule XmlBuilder do
     [:xml_decl | elements_with_prolog(elements) |> List.wrap] |> generate
   end
 
+  @doc false
   def doc(name, attrs_or_content) do
     IO.warn "doc/2 is deprecated. Use document/2 with generate/1 instead."
     [:xml_decl | [element(name, attrs_or_content)]] |> generate
   end
 
+  @doc false
   def doc(name, attrs, content) do
     IO.warn "doc/3 is deprecated. Use document/3 with generate/1 instead."
     [:xml_decl | [element(name, attrs, content)]] |> generate
