@@ -46,7 +46,7 @@ Like `<person id="12345"><first>Josh</first><last>Nussbaum</last></person>`
 For more readability, you can use XmlBuilder's methods instead of creating tuples manually.
 
 ```elixir
-XmlBuilder.doc(:person, "Josh")
+XmlBuilder.document(:person, "Josh") |> XmlBuilder.generate
 ```
 
 Outputs
@@ -99,22 +99,22 @@ def person(id, first, last) do
                               last: last)
 end
 
-iex> person(123, "Josh", "Nussbaum") |> generate
+iex> person(123, "Josh", "Nussbaum") |> generate(format: :none)
 "<person id=\"123\"><first>Josh</first><last>Nussbaum</last></person>"
 ```
 
 ### DOCTYPE declarations
 
-A DOCTYPE can be declared by applying the `doctype` function at the first position of a list of elements in a `doc` definition:
+A DOCTYPE can be declared by applying the `doctype` function at the first position of a list of elements in a `document` definition:
 
 ```elixir
 import XmlBuilder
 
-doc([
+document([
   doctype("html", public: ["-//W3C//DTD XHTML 1.0 Transitional//EN",
                 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]), 
   element(:html, "Hello, world!")
-])
+]) |> generate
 ```
 
 Outputs
