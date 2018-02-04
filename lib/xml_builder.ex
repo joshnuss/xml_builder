@@ -4,11 +4,14 @@ defmodule XmlBuilder do
 
   ## Examples
 
-      iex> XmlBuilder.doc(:person)
+      iex> XmlBuilder.document(:person) |> XmlBuilder.generate
       "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<person/>"
 
-      iex> XmlBuilder.doc(:person, "Josh")
+      iex> XmlBuilder.document(:person, "Josh") |> XmlBuilder.generate
       "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<person>Josh</person>"
+
+      iex> XmlBuilder.document(:person) |> XmlBuilder.generate(format: :none)
+      "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?><person/>"
 
       iex> XmlBuilder.element(:person, "Josh") |> XmlBuilder.generate
       "<person>Josh</person>"
@@ -36,23 +39,40 @@ defmodule XmlBuilder do
 
   ## Examples
 
-      iex> XmlBuilder.doc(:person)
+      iex> XmlBuilder.document(:person) |> XmlBuilder.generate
       "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<person/>"
 
-      iex> XmlBuilder.doc(:person, %{id: 1})
+      iex> XmlBuilder.document(:person, %{id: 1}) |> XmlBuilder.generate
       "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<person id=\\\"1\\\"/>"
 
-      iex> XmlBuilder.doc(:person, %{id: 1}, "some data")
+      iex> XmlBuilder.document(:person, %{id: 1}, "some data") |> XmlBuilder.generate
       "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<person id=\\\"1\\\">some data</person>"
   """
-  def doc(elements),
-    do: [:xml_decl | elements_with_prolog(elements) |> List.wrap] |> generate
+  def document(elements),
+    do: [:xml_decl | elements_with_prolog(elements) |> List.wrap]
 
-  def doc(name, attrs_or_content),
-    do: [:xml_decl | [element(name, attrs_or_content)]] |> generate
+  def document(name, attrs_or_content),
+    do: [:xml_decl | [element(name, attrs_or_content)]]
 
-  def doc(name, attrs, content),
-    do: [:xml_decl | [element(name, attrs, content)]] |> generate
+  def document(name, attrs, content),
+    do: [:xml_decl | [element(name, attrs, content)]]
+
+
+  @doc false
+  def doc(elements) do
+    IO.warn "doc/1 is deprecated. Use document/1 with generate/1 instead."
+    [:xml_decl | elements_with_prolog(elements) |> List.wrap] |> generate
+  end
+
+  def doc(name, attrs_or_content) do
+    IO.warn "doc/2 is deprecated. Use document/2 with generate/1 instead."
+    [:xml_decl | [element(name, attrs_or_content)]] |> generate
+  end
+
+  def doc(name, attrs, content) do
+    IO.warn "doc/3 is deprecated. Use document/3 with generate/1 instead."
+    [:xml_decl | [element(name, attrs, content)]] |> generate
+  end
 
   @doc """
   Create an XML element.
@@ -122,10 +142,10 @@ defmodule XmlBuilder do
   ```elixir
   import XmlBuilder
 
-  doc([
+  document([
     doctype("greeting", system: "hello.dtd"),
     element(:person, "Josh")
-  ])
+  ]) |> generate
   ```
 
   Outputs
@@ -149,11 +169,11 @@ defmodule XmlBuilder do
   ```elixir
   import XmlBuilder
 
-  doc([
+  document([
     doctype("html", public: ["-//W3C//DTD XHTML 1.0 Transitional//EN",
                   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]),
     element(:html, "Hello, world!")
-  ])
+  ]) |> generate
   ```
 
   Outputs
