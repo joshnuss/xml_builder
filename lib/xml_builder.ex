@@ -214,6 +214,9 @@ defmodule XmlBuilder do
   def generate(any, options \\ []),
     do: format(any, 0, options) |> IO.chardata_to_string
 
+  defp format(:xml_decl, 0, [encoding: encoding]),
+    do: ~s|<?xml version="1.0" encoding="#{encoding}"?>|
+
   defp format(:xml_decl, 0, _options),
     do: ~s|<?xml version="1.0" encoding="UTF-8"?>|
 

@@ -61,6 +61,16 @@ defmodule XmlBuilderTest do
       expectation = "<level1>\n\t<level2>test_value</level2>\n</level1>"
       assert XmlBuilder.generate(input(), whitespace: "\t") == expectation
     end
+
+    test "encoding defaults to UTF-8" do
+      expectation = ~s|<?xml version="1.0" encoding="UTF-8"?>|
+      assert XmlBuilder.generate(:xml_decl) == expectation
+    end
+
+    test "encoding option is used" do
+      expectation = ~s|<?xml version="1.0" encoding="ISO-8859-1"?>|
+      assert XmlBuilder.generate(:xml_decl, encoding: "ISO-8859-1") == expectation
+    end
   end
 
   test "element with content" do
