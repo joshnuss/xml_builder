@@ -71,6 +71,14 @@ defmodule XmlBuilderTest do
       expectation = ~s|<?xml version="1.0" encoding="ISO-8859-1"?>|
       assert XmlBuilder.generate(:xml_decl, encoding: "ISO-8859-1") == expectation
     end
+
+    test "encoding option works with other options" do
+      xml = [XmlBuilder.element(:oldschool, [])]
+      |> XmlBuilder.document()
+      |> XmlBuilder.generate(format: :indent, encoding: "ISO-8859-1")
+      expectation = ~s|<?xml version="1.0" encoding="ISO-8859-1"?>\n<oldschool/>|
+      assert xml == expectation
+    end
   end
 
   test "element with content" do
