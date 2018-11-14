@@ -210,12 +210,17 @@ defmodule XmlBuilder do
 
       iex> XmlBuilder.generate({:name, nil, [{:first, nil, "Steve"}]})
       "<name>\\n  <first>Steve</first>\\n</name>"
+
+      iex> XmlBuilder.generate(:xml_decl, encoding: "ISO-8859-1")
+      ~s|<?xml version="1.0" encoding="ISO-8859-1"?>|
   """
   def generate(any, options \\ []),
     do: format(any, 0, options) |> IO.chardata_to_string
 
-  defp format(:xml_decl, 0, _options),
-    do: ~s|<?xml version="1.0" encoding="UTF-8"?>|
+  defp format(:xml_decl, 0, options) do
+    encoding = Keyword.get(options, :encoding, "UTF-8")
+    ~s|<?xml version="1.0" encoding="#{encoding}"?>|
+  end
 
   defp format({:doctype, {:system, name, system}}, 0, _options),
     do: ['<!DOCTYPE ', to_string(name), ' SYSTEM "', to_string(system), '">']

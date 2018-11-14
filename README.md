@@ -125,6 +125,27 @@ Outputs
 <html>Hello, world!</html>
 ```
 
+### Encoding
+
+While the output is always UTF-8 and has to be converted in another place, you can override the encoding statement in the xml declaration
+with the `encoding` option:
+
+```elixir
+import XmlBuilder
+
+[XmlBuilder.element(:oldschool, [])]
+|> XmlBuilder.document()
+|> XmlBuilder.generate(encoding: "ISO-8859-1")
+|> :unicode.characters_to_binary(:unicode, :latin1)
+```
+
+Outputs
+
+```xml
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<oldschool/>
+```
+
 ### Formatting
 
 With indentation: `XmlBuilder.generate(doc, format: :indent)`
