@@ -84,7 +84,7 @@ Outputs
 <person id="456">
   <first>Steve</first>
   <last>Wozniak</last>
-</person>"
+</person>
 ```
 
 #### Using keyed lists
