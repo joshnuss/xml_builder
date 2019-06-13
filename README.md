@@ -148,8 +148,13 @@ Outputs
 
 ### Formatting
 
-With indentation: `XmlBuilder.generate(doc, format: :indent)`
-Without indentation: `XmlBuilder.generate(doc, format: :none)`
+To remove indentation, pass `format: :none` option to `XmlBuilder.generate/2`:
+
+```
+doc |> XmlBuilder.generate(format: :none)
+```
+
+The default is to formatting with indentation, which is equivalent to `XmlBuilder.generate(doc, format: :indent)`
 
 ## License
 
