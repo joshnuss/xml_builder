@@ -150,7 +150,7 @@ Outputs
 
 To remove indentation, pass `format: :none` option to `XmlBuilder.generate/2`:
 
-```
+```elixir
 doc |> XmlBuilder.generate(format: :none)
 ```
 
