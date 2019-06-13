@@ -19,7 +19,7 @@ Add dependency to your project's `mix.exs`
 
 ```elixir
 def deps do
-  [{:xml_builder, "~> 2.0.0"}]
+  [{:xml_builder, "~> 2.1.1"}]
 end
 ```
 
@@ -46,7 +46,7 @@ Like `<person id="12345"><first>Josh</first><last>Nussbaum</last></person>`
 For more readability, you can use XmlBuilder's methods instead of creating tuples manually.
 
 ```elixir
-XmlBuilder.doc(:person, "Josh") |> XmlBuilder.generate
+XmlBuilder.document(:person, "Josh") |> XmlBuilder.generate
 ```
 
 Outputs
@@ -134,7 +134,7 @@ with the `encoding` option:
 import XmlBuilder
 
 [XmlBuilder.element(:oldschool, [])]
-|> XmlBuilder.doc()
+|> XmlBuilder.document()
 |> XmlBuilder.generate(encoding: "ISO-8859-1")
 |> :unicode.characters_to_binary(:unicode, :latin1)
 ```
