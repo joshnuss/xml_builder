@@ -46,7 +46,7 @@ Like `<person id="12345"><first>Josh</first><last>Nussbaum</last></person>`
 For more readability, you can use XmlBuilder's methods instead of creating tuples manually.
 
 ```elixir
-XmlBuilder.document(:person, "Josh") |> XmlBuilder.generate
+XmlBuilder.doc(:person, "Josh") |> XmlBuilder.generate
 ```
 
 Outputs
@@ -112,7 +112,7 @@ import XmlBuilder
 
 document([
   doctype("html", public: ["-//W3C//DTD XHTML 1.0 Transitional//EN",
-                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]), 
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]),
   element(:html, "Hello, world!")
 ]) |> generate
 ```
@@ -134,7 +134,7 @@ with the `encoding` option:
 import XmlBuilder
 
 [XmlBuilder.element(:oldschool, [])]
-|> XmlBuilder.document()
+|> XmlBuilder.doc()
 |> XmlBuilder.generate(encoding: "ISO-8859-1")
 |> :unicode.characters_to_binary(:unicode, :latin1)
 ```
