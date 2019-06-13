@@ -19,7 +19,7 @@ Add dependency to your project's `mix.exs`
 
 ```elixir
 def deps do
-  [{:xml_builder, "~> 2.0.0"}]
+  [{:xml_builder, "~> 2.1.1"}]
 end
 ```
 
@@ -112,7 +112,7 @@ import XmlBuilder
 
 document([
   doctype("html", public: ["-//W3C//DTD XHTML 1.0 Transitional//EN",
-                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]), 
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"]),
   element(:html, "Hello, world!")
 ]) |> generate
 ```
