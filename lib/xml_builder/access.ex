@@ -1,7 +1,7 @@
 defmodule XmlBuilder.Access do
   @moduledoc """
   Provides a function-based `Access` implementation. This allows to get an access
-  to deeply nested elemetns via `Kernel.get_in/2`, `Kernel.put_in/3`,
+  to deeply nested elemetns via `Kernel.get_in/2`, `Kernel.pop_in/2`, `Kernel.put_in/3`,
   `Kernel.update_in/3`, and `Kernel.get_and_update_in/3`.
 
   **Example:**

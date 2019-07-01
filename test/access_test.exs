@@ -84,4 +84,20 @@ defmodule XmlBuilder.Access.Test do
                 {:first, %{id: 12345}, "Mary"}
               ]}
   end
+
+  test "pop_in/2", %{person: person} do
+    assert pop_in(person, [
+             XmlBuilder.Access.key(:subperson),
+             XmlBuilder.Access.key(:first)
+           ]) ==
+             {{:first, %{}, "John"},
+              {:person, %{id: 12345},
+               [
+                 {:first, %{}, "Josh"},
+                 {:last, %{}, "Nussbaum"},
+                 {:first, %{}, "Jane"},
+                 {:last, %{}, "Doe"},
+                 {:subperson, %{class: "nested"}, [{:last, %{}, "Doe"}]}
+               ]}}
+  end
 end
