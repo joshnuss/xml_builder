@@ -57,7 +57,8 @@ defmodule XmlBuilder.Access do
       {"John", {:person, %{id: 1}, [{:name, %{}, "Mary"}]}}
 
   """
-  @spec key(key :: maybe_ordered_key()) :: Access.access_fun()
+  @spec key(key :: maybe_ordered_key()) ::
+          Access.access_fun(data :: {atom(), map(), list() | any()}, get_value :: term)
 
   def key(key \\ nil)
 
