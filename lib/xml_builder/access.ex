@@ -57,14 +57,11 @@ defmodule XmlBuilder.Access do
       {"John", {:person, %{id: 1}, [{:name, %{}, "Mary"}]}}
 
   """
-  @spec key(
-          key :: maybe_ordered_key(),
-          opts :: keyword()
-        ) :: any | {any(), any()}
+  @spec key(key :: maybe_ordered_key()) :: any() | {any(), any()}
 
-  def key(key \\ nil, opts \\ [])
+  def key(key \\ nil)
 
-  def key(nil, _opts) do
+  def key(nil) do
     fn
       :get, {_name, _attrs, value}, fun ->
         fun.(value)
@@ -80,9 +77,9 @@ defmodule XmlBuilder.Access do
     end
   end
 
-  def key(key, opts) when is_atom(key), do: key({key, 0}, opts)
+  def key(key) when is_atom(key), do: key({key, 0})
 
-  def key({key, index}, _opts) when is_atom(key) and is_integer(index) do
+  def key({key, index}) when is_atom(key) and is_integer(index) do
     fn
       :get, {_name, _attrs, value}, fun when is_list(value) ->
         {value, idx} = if index < 0, do: {Enum.reverse(value), -index - 1}, else: {value, index}
