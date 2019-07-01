@@ -23,7 +23,7 @@ defmodule XmlBuilder.Access do
   index zero.
   """
   @type maybe_ordered_key ::
-          nil | atom() | {atom(), integer() | :append | :prepend}
+          nil | atom() | {atom(), integer()}
 
   @doc """
   Default `Access` function implementation accepting default values.
