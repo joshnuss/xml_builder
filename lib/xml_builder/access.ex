@@ -9,9 +9,9 @@ defmodule XmlBuilder.Access do
       ...>   [XmlBuilder.Access.key(:data), XmlBuilder.Access.key(:name), XmlBuilder.Access.key()])
       "John"
 
-      iex> get_in({:persons, %{}, [{:name, %{}, "John"}, {:name, %{}, "Jane"}]},
-      ...>   [XmlBuilder.Access.key({:name, -1}), XmlBuilder.Access.key()])
-      "Jane"
+      iex> update_in({:persons, %{}, [{:name, %{}, "John"}, {:name, %{}, "Jane"}]},
+      ...>   [XmlBuilder.Access.key({:name, -1}), XmlBuilder.Access.key()], fn _ -> "Mary" end)
+      {:persons, %{}, [{:name, %{}, "John"}, {:name, %{}, "Mary"}]}
 
   Negative indices are supported, `-1` for the last element, `-2` for next to the last etc.
 
@@ -57,7 +57,7 @@ defmodule XmlBuilder.Access do
       {"John", {:person, %{id: 1}, [{:name, %{}, "Mary"}]}}
 
   """
-  @spec key(key :: maybe_ordered_key()) :: any() | {any(), any()}
+  @spec key(key :: maybe_ordered_key()) :: Access.access_fun()
 
   def key(key \\ nil)
 
