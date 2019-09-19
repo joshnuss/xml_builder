@@ -126,15 +126,16 @@ defmodule XmlBuilderTest do
 
   test "quoting and escaping attributes" do
     assert element(:person, %{height: 12}) == ~s|<person height="12"/>|
-    assert element(:person, %{height: ~s|10'|}) == ~s|<person height="10'"/>|
-    assert element(:person, %{height: ~s|10"|}) == ~s|<person height='10"'/>|
-    assert element(:person, %{height: ~s|<10'5"|}) == ~s|<person height="&lt;10'5&quot;"/>|
+    assert element(:person, %{height: ~s|10'|}) == ~s|<person height="10&apos;"/>|
+    assert element(:person, %{height: ~s|10"|}) == ~s|<person height='10&quot;'/>|
+    assert element(:person, %{height: ~s|<10'5"|}) == ~s|<person height="&lt;10&apos;5&quot;"/>|
   end
 
   test "escaping content" do
     assert element(:person, "Josh") == "<person>Josh</person>"
     assert element(:person, "<Josh>") == "<person>&lt;Josh&gt;</person>"
-    assert element(:data, "1 <> 2 & 2 <> 3") == "<data>1 &lt;&gt; 2 &amp; 2 &lt;&gt; 3</data>"
+    assert element(:data, ~s|1 <> 2 & 2 <> 3 "'"'|) == "<data>1 &lt;&gt; 2 &amp; 2 &lt;&gt; 3 &quot;&apos;&quot;&apos;</data>"
+    assert element(:data, ~s|&gt;&lt;&quot;&apos;&amp;|) == "<data>&gt;&lt;&quot;&apos;&amp;</data>"
   end
 
   test "wrap content inside cdata and skip escaping" do
