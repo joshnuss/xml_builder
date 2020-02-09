@@ -80,7 +80,7 @@ Outputs
 <person id="123">
   <first>Steve</first>
   <last>Jobs</last>
-</person>"
+</person>
 <person id="456">
   <first>Steve</first>
   <last>Wozniak</last>
