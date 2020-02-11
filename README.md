@@ -5,7 +5,7 @@ XML Builder
 
 ## Overview
 
-An Elixir library for building xml.
+An Elixir library for building xml. It is inspired by the late [Jim Weirich](https://github.com/jimweirich)'s awesome [builder](https://github.com/jimweirich/builder) library for Ruby.
 
 Each xml node is structured as a tuple of name, attributes map and content/list:
 
