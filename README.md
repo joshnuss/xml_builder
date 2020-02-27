@@ -133,8 +133,7 @@ with the `encoding` option:
 ```elixir
 import XmlBuilder
 
-[element(:oldschool, [])]
-|> document()
+document(:oldschool)
 |> generate(encoding: "ISO-8859-1")
 |> :unicode.characters_to_binary(:unicode, :latin1)
 ```
