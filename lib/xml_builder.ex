@@ -219,7 +219,11 @@ defmodule XmlBuilder do
 
   defp format(:xml_decl, 0, options) do
     encoding = Keyword.get(options, :encoding, "UTF-8")
-    ~s|<?xml version="1.0" encoding="#{encoding}"?>|
+    standalone = case Keyword.get(options, :standalone, false) do
+      true -> ~s| standalone="yes"|
+      false -> ""
+    end
+    ~s|<?xml version="1.0" encoding="#{encoding}"#{standalone}?>|
   end
 
   defp format({:doctype, {:system, name, system}}, 0, _options),

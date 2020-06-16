@@ -145,6 +145,24 @@ Outputs
 <oldschool/>
 ```
 
+### Standalone
+
+Should you need `standalone="yes"` in the xml declaration, you can pass `standalone: true` as option to the `generate/2` call:
+
+```elixir
+import XmlBuilder
+
+document(:outsider)
+|> generate(standalone: true)
+```
+
+Outputs
+
+```xml
+<?xml version="1.0" standalone="yes"?>
+<outsider/>
+```
+
 ### Formatting
 
 To remove indentation, pass `format: :none` option to `XmlBuilder.generate/2`:
