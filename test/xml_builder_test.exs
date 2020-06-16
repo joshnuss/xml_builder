@@ -79,6 +79,21 @@ defmodule XmlBuilderTest do
       expectation = ~s|<?xml version="1.0" encoding="ISO-8859-1"?>\n<oldschool/>|
       assert xml == expectation
     end
+
+    test "standalone option is used" do
+      expectation = ~s|<?xml version="1.0" encoding="UTF-8" standalone="yes"?>|
+      assert XmlBuilder.generate(:xml_decl, standalone: true) == expectation
+    end
+
+    test "standalone option works with other options" do
+      xml =
+        [XmlBuilder.element(:standaloneOldschool, [])]
+        |> XmlBuilder.document()
+        |> XmlBuilder.generate(format: :indent, encoding: "ISO-8859-1", standalone: true)
+
+      expectation = ~s|<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>\n<standaloneOldschool/>|
+      assert xml == expectation
+    end
   end
 
   test "element with content" do
