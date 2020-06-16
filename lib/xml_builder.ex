@@ -49,7 +49,7 @@ defmodule XmlBuilder do
       "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<person id=\\\"1\\\">some data</person>"
   """
   def document(elements),
-    do: [:xml_decl | elements_with_prolog(elements) |> List.wrap]
+    do: [:xml_decl | elements_with_prolog(elements) |> List.wrap()]
 
   def document(name, attrs_or_content),
     do: [:xml_decl | [element(name, attrs_or_content)]]
@@ -57,22 +57,21 @@ defmodule XmlBuilder do
   def document(name, attrs, content),
     do: [:xml_decl | [element(name, attrs, content)]]
 
-
   @doc false
   def doc(elements) do
-    IO.warn "doc/1 is deprecated. Use document/1 with generate/1 instead."
-    [:xml_decl | elements_with_prolog(elements) |> List.wrap] |> generate
+    IO.warn("doc/1 is deprecated. Use document/1 with generate/1 instead.")
+    [:xml_decl | elements_with_prolog(elements) |> List.wrap()] |> generate
   end
 
   @doc false
   def doc(name, attrs_or_content) do
-    IO.warn "doc/2 is deprecated. Use document/2 with generate/1 instead."
+    IO.warn("doc/2 is deprecated. Use document/2 with generate/1 instead.")
     [:xml_decl | [element(name, attrs_or_content)]] |> generate
   end
 
   @doc false
   def doc(name, attrs, content) do
-    IO.warn "doc/3 is deprecated. Use document/3 with generate/1 instead."
+    IO.warn("doc/3 is deprecated. Use document/3 with generate/1 instead.")
     [:xml_decl | [element(name, attrs, content)]] |> generate
   end
 
@@ -215,14 +214,17 @@ defmodule XmlBuilder do
       ~s|<?xml version="1.0" encoding="ISO-8859-1"?>|
   """
   def generate(any, options \\ []),
-    do: format(any, 0, options) |> IO.chardata_to_string
+    do: format(any, 0, options) |> IO.chardata_to_string()
 
   defp format(:xml_decl, 0, options) do
     encoding = Keyword.get(options, :encoding, "UTF-8")
-    standalone = case Keyword.get(options, :standalone, false) do
-      true -> ~s| standalone="yes"|
-      false -> ""
-    end
+
+    standalone =
+      case Keyword.get(options, :standalone, false) do
+        true -> ~s| standalone="yes"|
+        false -> ""
+      end
+
     ~s|<?xml version="1.0" encoding="#{encoding}"#{standalone}?>|
   end
 
@@ -230,7 +232,15 @@ defmodule XmlBuilder do
     do: ['<!DOCTYPE ', to_string(name), ' SYSTEM "', to_string(system), '">']
 
   defp format({:doctype, {:public, name, public, system}}, 0, _options),
-    do: ['<!DOCTYPE ', to_string(name), ' PUBLIC "', to_string(public), '" "', to_string(system), '">']
+    do: [
+      '<!DOCTYPE ',
+      to_string(name),
+      ' PUBLIC "',
+      to_string(public),
+      '" "',
+      to_string(system),
+      '">'
+    ]
 
   defp format(string, level, options) when is_bitstring(string),
     do: format({nil, nil, string}, level, options)
@@ -243,30 +253,81 @@ defmodule XmlBuilder do
   defp format({nil, nil, name}, level, options) when is_bitstring(name),
     do: [indent(level, options), to_string(name)]
 
-  defp format({name, attrs, content}, level, options) when is_blank_attrs(attrs) and is_blank_list(content),
-    do: [indent(level, options), '<', to_string(name), '/>']
+  defp format({name, attrs, content}, level, options)
+       when is_blank_attrs(attrs) and is_blank_list(content),
+       do: [indent(level, options), '<', to_string(name), '/>']
 
   defp format({name, attrs, content}, level, options) when is_blank_list(content),
     do: [indent(level, options), '<', to_string(name), ' ', format_attributes(attrs), '/>']
 
-  defp format({name, attrs, content}, level, options) when is_blank_attrs(attrs) and not is_list(content),
-    do: [indent(level, options), '<', to_string(name), '>', format_content(content, level+1, options), '</', to_string(name), '>']
+  defp format({name, attrs, content}, level, options)
+       when is_blank_attrs(attrs) and not is_list(content),
+       do: [
+         indent(level, options),
+         '<',
+         to_string(name),
+         '>',
+         format_content(content, level + 1, options),
+         '</',
+         to_string(name),
+         '>'
+       ]
 
-  defp format({name, attrs, content}, level, options) when is_blank_attrs(attrs) and is_list(content) do
+  defp format({name, attrs, content}, level, options)
+       when is_blank_attrs(attrs) and is_list(content) do
     format_char = formatter(options).line_break()
-    [indent(level, options), '<', to_string(name), '>', format_content(content, level+1, options), format_char, indent(level, options), '</', to_string(name), '>']
+
+    [
+      indent(level, options),
+      '<',
+      to_string(name),
+      '>',
+      format_content(content, level + 1, options),
+      format_char,
+      indent(level, options),
+      '</',
+      to_string(name),
+      '>'
+    ]
   end
 
-  defp format({name, attrs, content}, level, options) when not is_blank_attrs(attrs) and not is_list(content),
-    do: [indent(level, options), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1, options), '</', to_string(name), '>']
+  defp format({name, attrs, content}, level, options)
+       when not is_blank_attrs(attrs) and not is_list(content),
+       do: [
+         indent(level, options),
+         '<',
+         to_string(name),
+         ' ',
+         format_attributes(attrs),
+         '>',
+         format_content(content, level + 1, options),
+         '</',
+         to_string(name),
+         '>'
+       ]
 
-  defp format({name, attrs, content}, level, options) when not is_blank_attrs(attrs) and is_list(content) do
+  defp format({name, attrs, content}, level, options)
+       when not is_blank_attrs(attrs) and is_list(content) do
     format_char = formatter(options).line_break()
-    [indent(level, options), '<', to_string(name), ' ', format_attributes(attrs), '>', format_content(content, level+1, options), format_char, indent(level, options), '</', to_string(name), '>']
+
+    [
+      indent(level, options),
+      '<',
+      to_string(name),
+      ' ',
+      format_attributes(attrs),
+      '>',
+      format_content(content, level + 1, options),
+      format_char,
+      indent(level, options),
+      '</',
+      to_string(name),
+      '>'
+    ]
   end
 
   defp elements_with_prolog([first | rest]) when length(rest) > 0,
-    do: [first_element(first) |element(rest)]
+    do: [first_element(first) | element(rest)]
 
   defp elements_with_prolog(element_spec),
     do: element(element_spec)
@@ -280,7 +341,7 @@ defmodule XmlBuilder do
   defp formatter(options) do
     case Keyword.get(options, :format) do
       :none -> XmlBuilder.Format.None
-      _     -> XmlBuilder.Format.Indented
+      _ -> XmlBuilder.Format.Indented
     end
   end
 
@@ -293,7 +354,10 @@ defmodule XmlBuilder do
     do: escape(content)
 
   defp format_attributes(attrs),
-    do: Enum.map_join(attrs, " ", fn {name,value} -> [to_string(name), '=', quote_attribute_value(value)] end)
+    do:
+      Enum.map_join(attrs, " ", fn {name, value} ->
+        [to_string(name), '=', quote_attribute_value(value)]
+      end)
 
   defp indent(level, options) do
     formatter = formatter(options)
@@ -311,8 +375,12 @@ defmodule XmlBuilder do
     cond do
       double && single ->
         escaped |> String.replace("\"", "&quot;") |> quote_attribute_value
-      double -> "'#{escaped}'"
-      true -> ~s|"#{escaped}"|
+
+      double ->
+        "'#{escaped}'"
+
+      true ->
+        ~s|"#{escaped}"|
     end
   end
 

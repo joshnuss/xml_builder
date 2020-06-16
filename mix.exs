@@ -2,19 +2,20 @@ defmodule XmlBuilder.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :xml_builder,
-     version: "2.1.2",
-     elixir: ">= 0.14.0",
-     deps: deps(),
-     package: [
-       maintainers: ["Joshua Nussbaum"],
-       licenses: ["MIT"],
-       links: %{github: "https://github.com/joshnuss/xml_builder"}
-     ],
-     description: """
-     XML builder for Elixir
-     """
-   ]
+    [
+      app: :xml_builder,
+      version: "2.1.2",
+      elixir: ">= 0.14.0",
+      deps: deps(),
+      package: [
+        maintainers: ["Joshua Nussbaum"],
+        licenses: ["MIT"],
+        links: %{github: "https://github.com/joshnuss/xml_builder"}
+      ],
+      description: """
+      XML builder for Elixir
+      """
+    ]
   end
 
   # Configuration for the OTP application
