@@ -134,11 +134,11 @@ defmodule XmlBuilder do
     do: element({name, attrs, content})
 
   @doc """
-  Creates a DOCTYPE declaration with a system identifier.
+  Creates a DOCTYPE declaration with a system or public identifier.
+
+  ## System Example
 
   Returns a `tuple` in the format `{:doctype, [:system, name, system_identifier}`.
-
-  ## Example
 
   ```elixir
   import XmlBuilder
@@ -156,16 +156,10 @@ defmodule XmlBuilder do
   <!DOCTYPE greeting SYSTEM "hello.dtd">
   <person>Josh</person>
   ```
-  """
-  def doctype(name, [{:system, system_identifier}]),
-    do: {:doctype, {:system, name, system_identifier}}
 
-  @doc """
-  Creates a DOCTYPE declaration with a public identifier.
+  ## Public Example
 
-  Returns a `tuple` in the format `{:doctype, [:public, name, public_identifier, system_identifier}`.
-
-  ## Example
+   Returns a `tuple` in the format `{:doctype, [:public, name, public_identifier, system_identifier}`.
 
   ```elixir
   import XmlBuilder
@@ -185,6 +179,9 @@ defmodule XmlBuilder do
   <html>Hello, world!</html>
   ```
   """
+  def doctype(name, [{:system, system_identifier}]),
+    do: {:doctype, {:system, name, system_identifier}}
+
   def doctype(name, [{:public, [public_identifier, system_identifier]}]),
     do: {:doctype, {:public, name, public_identifier, system_identifier}}
 
