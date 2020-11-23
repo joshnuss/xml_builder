@@ -1,7 +1,9 @@
 XML Builder
-=======
+===========
 
 [![Build Status](https://travis-ci.org/joshnuss/xml_builder.svg?branch=master)](https://travis-ci.org/joshnuss/xml_builder)
+
+[![Second Build Status](https://github.com/devstopfix/xml_builder/workflows/mix/badge.svg)](https://github.com/devstopfix/xml_builder)
 
 ## Overview
 
