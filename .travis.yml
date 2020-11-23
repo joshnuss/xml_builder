@@ -6,8 +6,6 @@ elixir:
   - 1.8
   - 1.7
   - 1.6
-otp_release:
-  - '22.3.4'
 env: MIX_ENV=test
 
 before_script:
