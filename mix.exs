@@ -4,7 +4,7 @@ defmodule XmlBuilder.Mixfile do
   def project do
     [
       app: :xml_builder,
-      version: "2.1.2",
+      version: "2.1.4",
       elixir: "~> 1.6",
       deps: deps(),
       package: [
