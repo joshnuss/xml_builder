@@ -1,5 +1,5 @@
 XML Builder
-=======
+===========
 
 [![Build Status](https://travis-ci.org/joshnuss/xml_builder.svg?branch=master)](https://travis-ci.org/joshnuss/xml_builder)
 
@@ -19,7 +19,7 @@ Add dependency to your project's `mix.exs`
 
 ```elixir
 def deps do
-  [{:xml_builder, "~> 2.1.1"}]
+  [{:xml_builder, "~> 2.1"}]
 end
 ```
 
