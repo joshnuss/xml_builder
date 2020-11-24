@@ -1,20 +1,21 @@
 defmodule XmlBuilder.Mixfile do
   use Mix.Project
 
+  @source_url "https://github.com/joshnuss/xml_builder"
+
   def project do
     [
       app: :xml_builder,
       version: "2.1.4",
       elixir: "~> 1.6",
       deps: deps(),
+      docs: docs(),
       package: [
         maintainers: ["Joshua Nussbaum"],
         licenses: ["MIT"],
-        links: %{github: "https://github.com/joshnuss/xml_builder"}
+        links: %{GitHub: @source_url}
       ],
-      description: """
-      XML builder for Elixir
-      """
+      description: "XML builder for Elixir"
     ]
   end
 
@@ -26,6 +27,14 @@ defmodule XmlBuilder.Mixfile do
     [
       {:credo, ">= 1.4.0 and < 1.5.0", only: [:dev, :test], runtime: false},
       {:ex_doc, github: "elixir-lang/ex_doc", only: :dev}
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      source_url: @source_url,
+      extras: ["README.md"]
     ]
   end
 end
