@@ -9,7 +9,13 @@ elixir:
 otp_release:
   - '22.3.4'
 
+jobs:
+  include:
+    - elixir: '1.6'
+      otp_release: '20.3.8'
+
 env: MIX_ENV=test
 
 before_script:
+  - kerl list installations
   - mix compile --warnings-as-errors
