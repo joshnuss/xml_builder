@@ -23,6 +23,9 @@ defmodule XmlBuilder.Mixfile do
   end
 
   defp deps do
-    [{:ex_doc, github: "elixir-lang/ex_doc", only: :dev}]
+    [
+      {:credo, ">= 1.4.0 and < 1.5.0", only: [:dev, :test], runtime: false},
+      {:ex_doc, github: "elixir-lang/ex_doc", only: :dev}
+    ]
   end
 end
