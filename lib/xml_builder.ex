@@ -403,5 +403,4 @@ defmodule XmlBuilder do
   defp escape_entity(<<"quot;"::utf8, rest::binary>>), do: ["&quot;" | escape_string(rest)]
   defp escape_entity(<<"apos;"::utf8, rest::binary>>), do: ["&apos;" | escape_string(rest)]
   defp escape_entity(rest), do: ["&amp;" | escape_string(rest)]
-
 end

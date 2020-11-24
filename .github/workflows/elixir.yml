@@ -1,10 +1,6 @@
 name: mix
 
-on:
-  push:
-    branches: [ master, "ci-5" ]
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -22,5 +18,6 @@ jobs:
           elixir-version: ${{matrix.elixir}}
       - run: mix deps.get
       - run: mix compile --warnings-as-errors
+      - run: mix format --check-formatted
       - run: mix credo --strict
       - run: mix test
