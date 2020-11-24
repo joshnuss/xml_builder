@@ -25,7 +25,7 @@ defmodule XmlBuilder do
   end
 
   defmacrop is_blank_list(list) do
-    quote do: is_nil(unquote(list)) or (is_list(unquote(list)) and length(unquote(list)) == 0)
+    quote do: is_nil(unquote(list)) or (is_list(unquote(list)) and unquote(list) == [])
   end
 
   defmacrop is_blank_map(map) do
