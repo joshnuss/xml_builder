@@ -1,13 +1,19 @@
 XML Builder
 ===========
 
-[![Build Status](https://travis-ci.org/joshnuss/xml_builder.svg?branch=master)](https://travis-ci.org/joshnuss/xml_builder)
+[![CI](https://github.com/joshnuss/xml_builder/workflows/mix/badge.svg)](https://github.com/joshnuss/xml_builder/actions)
+[![Module Version](https://img.shields.io/hexpm/v/xml_builder.svg)](https://hex.pm/packages/xml_builder)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/xml_builder/)
+[![Total Download](https://img.shields.io/hexpm/dt/xml_builder.svg)](https://hex.pm/packages/xml_builder)
+[![License](https://img.shields.io/hexpm/l/xml_builder.svg)](https://github.com/joshnuss/xml_builder/blob/master/LICENSE)
+[![Last Updated](https://img.shields.io/github/last-commit/joshnuss/xml_builder.svg)](https://github.com/joshnuss/xml_builder/commits/master)
+
 
 ## Overview
 
-An Elixir library for building xml. It is inspired by the late [Jim Weirich](https://github.com/jimweirich)'s awesome [builder](https://github.com/jimweirich/builder) library for Ruby.
+An Elixir library for building XML. It is inspired by the late [Jim Weirich](https://github.com/jimweirich)'s awesome [builder](https://github.com/jimweirich/builder) library for Ruby.
 
-Each xml node is structured as a tuple of name, attributes map and content/list:
+Each XML node is structured as a tuple of name, attributes map, and content/list.
 
 ```elixir
 {name, attrs, content | list}
@@ -15,7 +21,7 @@ Each xml node is structured as a tuple of name, attributes map and content/list:
 
 ## Installation
 
-Add dependency to your project's `mix.exs`
+Add dependency to your project's `mix.exs`:
 
 ```elixir
 def deps do
@@ -35,7 +41,7 @@ Like `<person id="12345">Josh</person>`, would look like:
 
 ### An element with child elements
 
-Like `<person id="12345"><first>Josh</first><last>Nussbaum</last></person>`
+Like `<person id="12345"><first>Josh</first><last>Nussbaum</last></person>`.
 
 ```elixir
 {:person, %{id: 12345}, [{:first, nil, "Josh"}, {:last, nil, "Nussbaum"}]} |> XmlBuilder.generate
@@ -49,7 +55,7 @@ For more readability, you can use XmlBuilder's methods instead of creating tuple
 XmlBuilder.document(:person, "Josh") |> XmlBuilder.generate
 ```
 
-Outputs
+Outputs:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -58,7 +64,7 @@ Outputs
 
 #### Building up an element
 
-An element can be built using multiple calls to the `element` function
+An element can be built using multiple calls to the `element` function.
 
 ```elixir
 import XmlBuilder
@@ -74,7 +80,7 @@ iex> [person(123, "Steve", "Jobs"),
       person(456, "Steve", "Wozniak")] |> generate
 ```
 
-Outputs
+Outputs.
 
 ```xml
 <person id="123">
@@ -89,7 +95,7 @@ Outputs
 
 #### Using keyed lists
 
-The previous example can be simplified using a keyed list
+The previous example can be simplified using a keyed list.
 
 ```elixir
 import XmlBuilder
@@ -117,7 +123,7 @@ document([
 ]) |> generate
 ```
 
-Outputs
+Outputs.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -127,8 +133,7 @@ Outputs
 
 ### Encoding
 
-While the output is always UTF-8 and has to be converted in another place, you can override the encoding statement in the xml declaration
-with the `encoding` option:
+While the output is always UTF-8 and has to be converted in another place, you can override the encoding statement in the XML declaration with the `encoding` option.
 
 ```elixir
 import XmlBuilder
@@ -138,7 +143,7 @@ document(:oldschool)
 |> :unicode.characters_to_binary(:unicode, :latin1)
 ```
 
-Outputs
+Outputs.
 
 ```xml
 <?xml version="1.0" encoding="ISO-8859-1"?>
@@ -147,7 +152,7 @@ Outputs
 
 ### Standalone
 
-Should you need `standalone="yes"` in the xml declaration, you can pass `standalone: true` as option to the `generate/2` call:
+Should you need `standalone="yes"` in the XML declaration, you can pass `standalone: true` as option to the `generate/2` call.
 
 ```elixir
 import XmlBuilder
@@ -156,7 +161,7 @@ document(:outsider)
 |> generate(standalone: true)
 ```
 
-Outputs
+Outputs.
 
 ```xml
 <?xml version="1.0" standalone="yes"?>
@@ -165,14 +170,14 @@ Outputs
 
 ### Formatting
 
-To remove indentation, pass `format: :none` option to `XmlBuilder.generate/2`:
+To remove indentation, pass `format: :none` option to `XmlBuilder.generate/2`.
 
 ```elixir
 doc |> XmlBuilder.generate(format: :none)
 ```
 
-The default is to formatting with indentation, which is equivalent to `XmlBuilder.generate(doc, format: :indent)`
+The default is to formatting with indentation, which is equivalent to `XmlBuilder.generate(doc, format: :indent)`.
 
 ## License
 
-MIT
+This source code is licensed under the [MIT License](https://github.com/joshnuss/xml_builder/blob/master/LICENSE). Copyright (c) 2014-present, Joshua Nussbaum. All rights reserved.
