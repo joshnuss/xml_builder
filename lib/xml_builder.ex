@@ -25,7 +25,7 @@ defmodule XmlBuilder do
   end
 
   defmacrop is_blank_list(list) do
-    quote do: is_nil(unquote(list)) or (is_list(unquote(list)) and length(unquote(list)) == 0)
+    quote do: is_nil(unquote(list)) or (is_list(unquote(list)) and unquote(list) == [])
   end
 
   defmacrop is_blank_map(map) do
@@ -403,5 +403,4 @@ defmodule XmlBuilder do
   defp escape_entity(<<"quot;"::utf8, rest::binary>>), do: ["&quot;" | escape_string(rest)]
   defp escape_entity(<<"apos;"::utf8, rest::binary>>), do: ["&apos;" | escape_string(rest)]
   defp escape_entity(rest), do: ["&amp;" | escape_string(rest)]
-
 end

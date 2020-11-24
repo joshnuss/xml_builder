@@ -20,7 +20,8 @@ defmodule XmlBuilderTest do
 
   test "document with DOCTYPE declaration and a public identifier" do
     assert document([
-             doctype("html",
+             doctype(
+               "html",
                public: [
                  "-//W3C//DTD XHTML 1.0 Transitional//EN",
                  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
@@ -57,7 +58,8 @@ defmodule XmlBuilderTest do
 
   test "doc with DOCTYPE declaration and a public identifier" do
     assert doc([
-             doctype("html",
+             doctype(
+               "html",
                public: [
                  "-//W3C//DTD XHTML 1.0 Transitional//EN",
                  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
