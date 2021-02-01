@@ -109,6 +109,22 @@ iex> person(123, "Josh", "Nussbaum") |> generate(format: :none)
 "<person id=\"123\"><first>Josh</first><last>Nussbaum</last></person>"
 ```
 
+#### Namespaces
+
+To use a namespace, add an `xmlns` attribute to the root element.
+
+To use multiple schemas, specify a `xmlns:nsName` attribute for each schema and use a colon `:` in the element name, ie `nsName:elementName`.
+
+```elixir
+import XmlBuilder
+
+iex> generate({:example, [xmlns: "http://schemas.example.tld/1999"], "content"})
+"<example xmlns=\"http://schemas.example.tld/1999\">content</example>"
+
+iex> generate({:"nsName:elementName", ["xmlns:nsName": "http://schemas.example.tld/1999"], "content"})
+"<nsName:elementName xmlns:nsName=\"http://schemas.example.tld/1999\">content</nsName:elementName>"
+```
+
 ### DOCTYPE declarations
 
 A DOCTYPE can be declared by applying the `doctype` function at the first position of a list of elements in a `document` definition:
