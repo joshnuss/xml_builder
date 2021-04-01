@@ -138,7 +138,7 @@ defmodule XmlBuilder do
 
   ## System Example
 
-  Returns a `tuple` in the format `{:doctype, [:system, name, system_identifier}`.
+  Returns a `tuple` in the format `{:doctype, {:system, name, system_identifier}}`.
 
   ```elixir
   import XmlBuilder
@@ -159,7 +159,7 @@ defmodule XmlBuilder do
 
   ## Public Example
 
-   Returns a `tuple` in the format `{:doctype, [:public, name, public_identifier, system_identifier}`.
+   Returns a `tuple` in the format `{:doctype, {:public, name, public_identifier, system_identifier}}`.
 
   ```elixir
   import XmlBuilder
