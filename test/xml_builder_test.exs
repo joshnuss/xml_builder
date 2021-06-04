@@ -114,6 +114,11 @@ defmodule XmlBuilderTest do
       assert XmlBuilder.generate(:xml_decl, standalone: false) == expectation
     end
 
+    test "standalone option is omitted" do
+      expectation = ~s|<?xml version="1.0" encoding="UTF-8"?>|
+      assert XmlBuilder.generate(:xml_decl) == expectation
+    end
+
     test "standalone option works with other options" do
       xml =
         [XmlBuilder.element(:standaloneOldschool, [])]
