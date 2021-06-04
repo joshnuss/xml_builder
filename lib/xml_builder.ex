@@ -217,9 +217,10 @@ defmodule XmlBuilder do
     encoding = Keyword.get(options, :encoding, "UTF-8")
 
     standalone =
-      case Keyword.get(options, :standalone, false) do
+      case Keyword.get(options, :standalone, nil) do
         true -> ~s| standalone="yes"|
-        false -> ""
+        false -> ~s| standalone="no"|
+        nil -> ""
       end
 
     ~s|<?xml version="1.0" encoding="#{encoding}"#{standalone}?>|
