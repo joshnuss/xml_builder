@@ -184,6 +184,15 @@ Outputs.
 <outsider/>
 ```
 
+If otherwise you need `standalone ="no"` in the XML declaration, you can pass `standalone: false` as an option to the` generate / 2` call.
+
+Outputs.
+
+```xml
+<?xml version="1.0" standalone="no"?>
+<outsider/>
+```
+
 ### Formatting
 
 To remove indentation, pass `format: :none` option to `XmlBuilder.generate/2`.
