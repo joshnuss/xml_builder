@@ -2,6 +2,8 @@ defmodule XmlBuilderTest do
   use ExUnit.Case
   doctest XmlBuilder
 
+  import ExUnit.CaptureIO
+
   import XmlBuilder,
     only: [doc: 1, doc: 2, doc: 3, document: 1, document: 2, document: 3, doctype: 2]
 
@@ -48,26 +50,41 @@ defmodule XmlBuilderTest do
   end
 
   test "doc with empty element" do
-    assert doc(:person) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
+    warning =
+      capture_io(:stderr, fn ->
+        assert doc(:person) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
+      end)
+
+    assert warning =~ "doc/1 is deprecated. Use document/1 with generate/1 instead."
   end
 
   test "doc with DOCTYPE declaration and a system identifier" do
-    assert doc([doctype("greeting", system: "hello.dtd"), {:greeting, "Hello, world!"}]) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE greeting SYSTEM "hello.dtd">\n<greeting>Hello, world!</greeting>|
+    warning =
+      capture_io(:stderr, fn ->
+        assert doc([doctype("greeting", system: "hello.dtd"), {:greeting, "Hello, world!"}]) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE greeting SYSTEM "hello.dtd">\n<greeting>Hello, world!</greeting>|
+      end)
+
+    assert warning =~ "doc/1 is deprecated. Use document/1 with generate/1 instead."
   end
 
   test "doc with DOCTYPE declaration and a public identifier" do
-    assert doc([
-             doctype(
-               "html",
-               public: [
-                 "-//W3C//DTD XHTML 1.0 Transitional//EN",
-                 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
-               ]
-             ),
-             {:html, "Hello, world!"}
-           ]) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n<html>Hello, world!</html>|
+    warning =
+      capture_io(:stderr, fn ->
+        assert doc([
+                 doctype(
+                   "html",
+                   public: [
+                     "-//W3C//DTD XHTML 1.0 Transitional//EN",
+                     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
+                   ]
+                 ),
+                 {:html, "Hello, world!"}
+               ]) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n<html>Hello, world!</html>|
+      end)
+
+    assert warning =~ "doc/1 is deprecated. Use document/1 with generate/1 instead."
   end
 
   describe "#generate with options" do
@@ -133,73 +150,113 @@ defmodule XmlBuilderTest do
   end
 
   test "element with content" do
-    assert doc(:person, "Josh") ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>Josh</person>|
+    warning =
+      capture_io(:stderr, fn ->
+        assert doc(:person, "Josh") ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>Josh</person>|
+      end)
+
+    assert warning =~ "doc/2 is deprecated. Use document/2 with generate/1 instead."
   end
 
   test "element with attributes" do
-    assert doc(:person, %{occupation: "Developer", city: "Montreal"}) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer"/>|
+    warning =
+      capture_io(:stderr, fn ->
+        assert doc(:person, %{occupation: "Developer", city: "Montreal"}) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer"/>|
 
-    assert doc(:person, %{}) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
+        assert doc(:person, %{}) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
+      end)
+
+    assert warning =~ "doc/2 is deprecated. Use document/2 with generate/1 instead."
   end
 
   test "element with attributes and content" do
-    assert doc(:person, %{occupation: "Developer", city: "Montreal"}, "Josh") ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer">Josh</person>|
+    warning =
+      capture_io(:stderr, fn ->
+        assert doc(:person, %{occupation: "Developer", city: "Montreal"}, "Josh") ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer">Josh</person>|
 
-    assert doc(:person, %{occupation: "Developer", city: "Montreal"}, nil) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer"/>|
+        assert doc(:person, %{occupation: "Developer", city: "Montreal"}, nil) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer"/>|
 
-    assert doc(:person, %{}, "Josh") ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>Josh</person>|
+        assert doc(:person, %{}, "Josh") ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>Josh</person>|
 
-    assert doc(:person, %{}, nil) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
+        assert doc(:person, %{}, nil) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
+      end)
+
+    assert warning =~ "doc/3 is deprecated. Use document/3 with generate/1 instead."
   end
 
   test "element with ordered attributes" do
-    assert doc(:person, [occupation: "Developer", city: "Montreal"], "Josh") ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person occupation="Developer" city="Montreal">Josh</person>|
+    warning =
+      capture_io(:stderr, fn ->
+        assert doc(:person, [occupation: "Developer", city: "Montreal"], "Josh") ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person occupation="Developer" city="Montreal">Josh</person>|
 
-    assert doc(:person, [occupation: "Developer", city: "Montreal"], nil) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person occupation="Developer" city="Montreal"/>|
+        assert doc(:person, [occupation: "Developer", city: "Montreal"], nil) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person occupation="Developer" city="Montreal"/>|
 
-    assert doc(:person, [occupation: "Developer", city: "Montreal"], nil) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person occupation="Developer" city="Montreal"/>|
+        assert doc(:person, [occupation: "Developer", city: "Montreal"], nil) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person occupation="Developer" city="Montreal"/>|
 
-    assert doc(:person, [], "Josh") ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>Josh</person>|
+        assert doc(:person, [], "Josh") ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>Josh</person>|
 
-    assert doc(:person, [], nil) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
+        assert doc(:person, [], nil) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
+      end)
+
+    assert warning =~ "doc/3 is deprecated. Use document/3 with generate/1 instead."
   end
 
   test "element with children" do
-    assert doc(:person, [{:name, %{id: 123}, "Josh"}]) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n  <name id="123">Josh</name>\n</person>|
+    warning =
+      capture_io(:stderr, fn ->
+        assert doc(:person, [{:name, %{id: 123}, "Josh"}]) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n  <name id="123">Josh</name>\n</person>|
 
-    assert doc(:person, [{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n  <first_name>Josh</first_name>\n  <last_name>Nussbaum</last_name>\n</person>|
+        assert doc(:person, [{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n  <first_name>Josh</first_name>\n  <last_name>Nussbaum</last_name>\n</person>|
+      end)
+
+    assert warning =~ "doc/2 is deprecated. Use document/2 with generate/1 instead."
   end
 
   test "element with attributes and children" do
-    assert doc(:person, %{id: 123}, [{:name, "Josh"}]) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person id="123">\n  <name>Josh</name>\n</person>|
+    warning =
+      capture_io(:stderr, fn ->
+        assert doc(:person, %{id: 123}, [{:name, "Josh"}]) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person id="123">\n  <name>Josh</name>\n</person>|
 
-    assert doc(:person, %{id: 123}, [{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person id="123">\n  <first_name>Josh</first_name>\n  <last_name>Nussbaum</last_name>\n</person>|
+        assert doc(:person, %{id: 123}, [{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person id="123">\n  <first_name>Josh</first_name>\n  <last_name>Nussbaum</last_name>\n</person>|
+      end)
+
+    assert warning =~ "doc/3 is deprecated. Use document/3 with generate/1 instead."
   end
 
   test "element with text content" do
-    assert doc(:person, ["TextNode", {:name, %{id: 123}, "Josh"}, "TextNode"]) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n  TextNode\n  <name id="123">Josh</name>\n  TextNode\n</person>|
+    warning =
+      capture_io(:stderr, fn ->
+        assert doc(:person, ["TextNode", {:name, %{id: 123}, "Josh"}, "TextNode"]) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n  TextNode\n  <name id="123">Josh</name>\n  TextNode\n</person>|
+      end)
+
+    assert warning =~ "doc/2 is deprecated. Use document/2 with generate/1 instead."
   end
 
   test "children elements" do
-    assert doc([{:name, %{id: 123}, "Josh"}]) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<name id="123">Josh</name>|
+    warning =
+      capture_io(:stderr, fn ->
+        assert doc([{:name, %{id: 123}, "Josh"}]) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<name id="123">Josh</name>|
 
-    assert doc([{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<first_name>Josh</first_name>\n<last_name>Nussbaum</last_name>|
+        assert doc([{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<first_name>Josh</first_name>\n<last_name>Nussbaum</last_name>|
+      end)
+
+    assert warning =~ "doc/1 is deprecated. Use document/1 with generate/1 instead."
   end
 
   test "quoting and escaping attributes" do
@@ -226,8 +283,13 @@ defmodule XmlBuilderTest do
   end
 
   test "multi level indentation" do
-    assert doc(person: [first: "Josh", last: "Nussbaum"]) ==
-             ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n  <first>Josh</first>\n  <last>Nussbaum</last>\n</person>|
+    warning =
+      capture_io(:stderr, fn ->
+        assert doc(person: [first: "Josh", last: "Nussbaum"]) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>\n  <first>Josh</first>\n  <last>Nussbaum</last>\n</person>|
+      end)
+
+    assert warning =~ "doc/1 is deprecated. Use document/1 with generate/1 instead."
   end
 
   def element(name, arg),
