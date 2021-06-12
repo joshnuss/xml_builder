@@ -213,6 +213,16 @@ defmodule XmlBuilder do
   def generate(any, options \\ []),
     do: format(any, 0, options) |> IO.chardata_to_string()
 
+  @doc """
+  Similar to `generate/2`, but returns `iodata` instead of a `binary`.
+
+  ## Examples
+
+    iex> XmlBuilder.generate_iodata(XmlBuilder.element(:person))
+    ["", '<', "person", '/>']
+  """
+  def generate_iodata(any, options \\ []), do: format(any, 0, options)
+
   defp format(:xml_decl, 0, options) do
     encoding = Keyword.get(options, :encoding, "UTF-8")
 
@@ -223,7 +233,7 @@ defmodule XmlBuilder do
         nil -> ""
       end
 
-    ~s|<?xml version="1.0" encoding="#{encoding}"#{standalone}?>|
+    ['<?xml version="1.0" encoding="', encoding, ?", standalone, '?>']
   end
 
   defp format({:doctype, {:system, name, system}}, 0, _options),
@@ -245,7 +255,7 @@ defmodule XmlBuilder do
 
   defp format(list, level, options) when is_list(list) do
     formatter = formatter(options)
-    list |> Enum.map(&format(&1, level, options)) |> Enum.intersperse(formatter.line_break())
+    Enum.map_intersperse(list, formatter.line_break(), &format(&1, level, options))
   end
 
   defp format({nil, nil, name}, level, options) when is_bitstring(name),
@@ -345,7 +355,7 @@ defmodule XmlBuilder do
 
   defp format_content(children, level, options) when is_list(children) do
     format_char = formatter(options).line_break()
-    [format_char, Enum.map_join(children, format_char, &format(&1, level, options))]
+    [format_char, Enum.map_intersperse(children, format_char, &format(&1, level, options))]
   end
 
   defp format_content(content, _level, _options),
@@ -353,7 +363,7 @@ defmodule XmlBuilder do
 
   defp format_attributes(attrs),
     do:
-      Enum.map_join(attrs, " ", fn {name, value} ->
+      Enum.map_intersperse(attrs, " ", fn {name, value} ->
         [to_string(name), '=', quote_attribute_value(value)]
       end)
 
@@ -375,10 +385,10 @@ defmodule XmlBuilder do
         escaped |> String.replace("\"", "&quot;") |> quote_attribute_value
 
       double ->
-        "'#{escaped}'"
+        [?', escaped, ?']
 
       true ->
-        ~s|"#{escaped}"|
+        [?", escaped, ?"]
     end
   end
 
