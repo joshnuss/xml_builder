@@ -255,7 +255,7 @@ defmodule XmlBuilder do
 
   defp format(list, level, options) when is_list(list) do
     formatter = formatter(options)
-    Enum.map_intersperse(list, formatter.line_break(), &format(&1, level, options))
+    map_intersperse(list, formatter.line_break(), &format(&1, level, options))
   end
 
   defp format({nil, nil, name}, level, options) when is_bitstring(name),
@@ -355,7 +355,7 @@ defmodule XmlBuilder do
 
   defp format_content(children, level, options) when is_list(children) do
     format_char = formatter(options).line_break()
-    [format_char, Enum.map_intersperse(children, format_char, &format(&1, level, options))]
+    [format_char, map_intersperse(children, format_char, &format(&1, level, options))]
   end
 
   defp format_content(content, _level, _options),
@@ -363,7 +363,7 @@ defmodule XmlBuilder do
 
   defp format_attributes(attrs),
     do:
-      Enum.map_intersperse(attrs, " ", fn {name, value} ->
+      map_intersperse(attrs, " ", fn {name, value} ->
         [to_string(name), '=', quote_attribute_value(value)]
       end)
 
@@ -414,4 +414,35 @@ defmodule XmlBuilder do
   defp escape_entity(<<"quot;"::utf8, rest::binary>>), do: ["&quot;" | escape_string(rest)]
   defp escape_entity(<<"apos;"::utf8, rest::binary>>), do: ["&apos;" | escape_string(rest)]
   defp escape_entity(rest), do: ["&amp;" | escape_string(rest)]
+
+  # Taken from Elixir v1.10's Enum.map_intersperse/3,
+  # to keep backwards-compatibility with older versions
+  defp map_intersperse(enumerable, separator, mapper)
+
+  defp map_intersperse(enumerable, separator, mapper) when is_list(enumerable) do
+    map_intersperse_list(enumerable, separator, mapper)
+  end
+
+  defp map_intersperse(enumerable, separator, mapper) do
+    reduced =
+      Enum.reduce(enumerable, :first, fn
+        entry, :first -> [mapper.(entry)]
+        entry, acc -> [mapper.(entry), separator | acc]
+      end)
+
+    if reduced == :first do
+      []
+    else
+      :lists.reverse(reduced)
+    end
+  end
+
+  defp map_intersperse_list([], _, _),
+    do: []
+
+  defp map_intersperse_list([last], _, mapper),
+    do: [mapper.(last)]
+
+  defp map_intersperse_list([head | rest], separator, mapper),
+    do: [mapper.(head), separator | map_intersperse_list(rest, separator, mapper)]
 end
