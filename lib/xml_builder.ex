@@ -25,11 +25,11 @@ defmodule XmlBuilder do
   end
 
   defmacrop is_blank_list(list) do
-    quote do: is_nil(unquote(list)) or (is_list(unquote(list)) and unquote(list) == [])
+    quote do: is_nil(unquote(list)) or unquote(list) == []
   end
 
   defmacrop is_blank_map(map) do
-    quote do: is_nil(unquote(map)) or (is_map(unquote(map)) and map_size(unquote(map)) == 0)
+    quote do: is_nil(unquote(map)) or unquote(map) == unquote(Macro.escape(%{}))
   end
 
   @doc """
@@ -102,6 +102,9 @@ defmodule XmlBuilder do
   """
   def element(name) when is_bitstring(name),
     do: element({nil, nil, name})
+
+  def element({:iodata, _data} = iodata),
+    do: element({nil, nil, iodata})
 
   def element(name) when is_bitstring(name) or is_atom(name),
     do: element({name})
@@ -211,7 +214,7 @@ defmodule XmlBuilder do
       ~s|<?xml version="1.0" encoding="ISO-8859-1"?>|
   """
   def generate(any, options \\ []),
-    do: format(any, 0, options) |> IO.chardata_to_string()
+    do: format(any, 0, options) |> IO.iodata_to_binary()
 
   @doc """
   Similar to `generate/2`, but returns `iodata` instead of a `binary`.
@@ -233,7 +236,7 @@ defmodule XmlBuilder do
         nil -> ""
       end
 
-    ['<?xml version="1.0" encoding="', encoding, ?", standalone, '?>']
+    ['<?xml version="1.0" encoding="', to_string(encoding), ?", standalone, '?>']
   end
 
   defp format({:doctype, {:system, name, system}}, 0, _options),
@@ -260,6 +263,8 @@ defmodule XmlBuilder do
 
   defp format({nil, nil, name}, level, options) when is_bitstring(name),
     do: [indent(level, options), to_string(name)]
+
+  defp format({nil, nil, {:iodata, iodata}}, _level, _options), do: iodata
 
   defp format({name, attrs, content}, level, options)
        when is_blank_attrs(attrs) and is_blank_list(content),
@@ -384,6 +389,9 @@ defmodule XmlBuilder do
     end
   end
 
+  defp escape({:iodata, iodata}), do: iodata
+  defp escape({:safe, data}) when is_bitstring(data), do: data
+  defp escape({:safe, data}), do: to_string(data)
   defp escape({:cdata, data}), do: ["<![CDATA[", data, "]]>"]
 
   defp escape(data) when is_binary(data),

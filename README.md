@@ -185,6 +185,49 @@ Outputs.
 <oldschool/>
 ```
 
+### Using `iodata()` directly
+
+While by default, output from `generate/2` is converted to `binary()`, you can use `generate_iodata/2` to skip this conversion. This can be convenient if you're using `IO.binwrite/2` on a `:raw` IO device, as these APIs can work with `iodata()` directly, leading to some performance gains.
+
+In some scenarios, it may be beneficial to generate part of your XML upfront, for instance when generating a `sitemap.xml`, you may have shared fields for `author`. Instead of generating this each time, you could do the following:
+
+```elixir
+import XmlBuilder
+
+entries = [%{title: "Test", url: "https://example.org/"}]
+
+# Generate static author data upfront
+author = generate_iodata(element(:author, [
+  element(:name, "John Doe"),
+  element(:uri, "https://example.org/")
+]))
+
+file = File.open!("path/to/file", [:raw])
+
+for entry <- entries do
+  iodata =
+    generate_iodata(element(:entry, [
+      # Reuse the static pre-generated fields as-is
+      {:iodata, author},
+
+      # Dynamic elements are generated for each entry
+      element(:title, entry.title),
+      element(:link, entry.url)
+    ]))
+
+  IO.binwrite(file, iodata)
+end
+```
+
+### Escaping
+
+XmlBuilder offers 3 distinct ways to control how content of tags is escaped and handled:
+
+- By default, any content is escaped, replacing reserved characters (`& " ' < >`) with their equivalent entity (`&amp;` etc.)
+- If content is wrapped in `{:cdata, cdata}`, the content in `cdata` is wrapped with `<![CDATA[...]]>`, and not escaped. You should make sure the content itself does not contain `]]>`.
+- If content is wrapped in `{:safe, data}`, the content in `data` is not escaped, but will be stringified if not a bitstring. Use this option carefully. It may be useful when data is guaranteed to be safe (numeric data).
+- If content is wrapped in `{:iodata, data}`, either in the top level or within a list, the `data` is used as `iodata()`, and will not be escaped, indented or stringified. An example of this can be seen in the "Using `iodata()` directly" example above.
+
 ### Standalone
 
 Should you need `standalone="yes"` in the XML declaration, you can pass `standalone: true` as option to the `generate/2` call.

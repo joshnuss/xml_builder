@@ -283,6 +283,21 @@ defmodule XmlBuilderTest do
              "<person><![CDATA[john & <is ok>]]></person>"
   end
 
+  test "wrap content inside safe and skip escaping" do
+    assert element(:person, {:safe, "john & <is ok>"}) == "<person>john & <is ok></person>"
+  end
+
+  test "wrap content inside iodata and skip escaping and binary conversion" do
+    assert element(:person, {:iodata, [element(:name, "john"), element(:age, "12")]}) ==
+             "<person><name>john</name><age>12</age></person>"
+
+    assert element(:person, {:iodata, ["test", ?i, "ng 123"]}) == "<person>testing 123</person>"
+
+    assert XmlBuilder.element(:person, {:iodata, ["test", ?i, "ng 123"]})
+           |> XmlBuilder.generate_iodata() ==
+             ["", '<', "person", '>', ["test", ?i, "ng 123"], '</', "person", '>']
+  end
+
   test "multi level indentation" do
     warning =
       capture_io(:stderr, fn ->
