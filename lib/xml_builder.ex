@@ -29,7 +29,7 @@ defmodule XmlBuilder do
   end
 
   defmacrop is_blank_map(map) do
-    quote do: is_nil(unquote(map)) or unquote(map) == unquote(Macro.escape(%{}))
+    quote do: is_nil(unquote(map)) or unquote(map) == %{}
   end
 
   @doc """
