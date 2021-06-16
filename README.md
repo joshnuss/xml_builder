@@ -147,25 +147,6 @@ Outputs.
 <html>Hello, world!</html>
 ```
 
-### CDATA declarations
-
-An example of how to add cdata to an element:
-
-```elixir
-import XmlBuilder
-
-element(
-"ElementWithCDATA",
-  {:cdata, "mydata"}
-) |> generate
-```
-
-Outputs.
-
-```xml
-<ElementWithCDATA><![CDATA[mydata]]></ElementWithCDATA>
-```
-
 ### Encoding
 
 While the output is always UTF-8 and has to be converted in another place, you can override the encoding statement in the XML declaration with the `encoding` option.
