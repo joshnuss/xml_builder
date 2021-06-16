@@ -25,11 +25,11 @@ defmodule XmlBuilder do
   end
 
   defmacrop is_blank_list(list) do
-    quote do: is_nil(unquote(list)) or (is_list(unquote(list)) and unquote(list) == [])
+    quote do: is_nil(unquote(list)) or unquote(list) == []
   end
 
   defmacrop is_blank_map(map) do
-    quote do: is_nil(unquote(map)) or (is_map(unquote(map)) and map_size(unquote(map)) == 0)
+    quote do: is_nil(unquote(map)) or unquote(map) == %{}
   end
 
   @doc """
@@ -102,6 +102,9 @@ defmodule XmlBuilder do
   """
   def element(name) when is_bitstring(name),
     do: element({nil, nil, name})
+
+  def element({:iodata, _data} = iodata),
+    do: element({nil, nil, iodata})
 
   def element(name) when is_bitstring(name) or is_atom(name),
     do: element({name})
@@ -211,7 +214,17 @@ defmodule XmlBuilder do
       ~s|<?xml version="1.0" encoding="ISO-8859-1"?>|
   """
   def generate(any, options \\ []),
-    do: format(any, 0, options) |> IO.chardata_to_string()
+    do: format(any, 0, options) |> IO.iodata_to_binary()
+
+  @doc """
+  Similar to `generate/2`, but returns `iodata` instead of a `binary`.
+
+  ## Examples
+
+    iex> XmlBuilder.generate_iodata(XmlBuilder.element(:person))
+    ["", '<', "person", '/>']
+  """
+  def generate_iodata(any, options \\ []), do: format(any, 0, options)
 
   defp format(:xml_decl, 0, options) do
     encoding = Keyword.get(options, :encoding, "UTF-8")
@@ -223,7 +236,7 @@ defmodule XmlBuilder do
         nil -> ""
       end
 
-    ~s|<?xml version="1.0" encoding="#{encoding}"#{standalone}?>|
+    ['<?xml version="1.0" encoding="', to_string(encoding), ?", standalone, '?>']
   end
 
   defp format({:doctype, {:system, name, system}}, 0, _options),
@@ -245,11 +258,13 @@ defmodule XmlBuilder do
 
   defp format(list, level, options) when is_list(list) do
     formatter = formatter(options)
-    list |> Enum.map(&format(&1, level, options)) |> Enum.intersperse(formatter.line_break())
+    map_intersperse(list, formatter.line_break(), &format(&1, level, options))
   end
 
   defp format({nil, nil, name}, level, options) when is_bitstring(name),
     do: [indent(level, options), to_string(name)]
+
+  defp format({nil, nil, {:iodata, iodata}}, _level, _options), do: iodata
 
   defp format({name, attrs, content}, level, options)
        when is_blank_attrs(attrs) and is_blank_list(content),
@@ -345,7 +360,7 @@ defmodule XmlBuilder do
 
   defp format_content(children, level, options) when is_list(children) do
     format_char = formatter(options).line_break()
-    [format_char, Enum.map_join(children, format_char, &format(&1, level, options))]
+    [format_char, map_intersperse(children, format_char, &format(&1, level, options))]
   end
 
   defp format_content(content, _level, _options),
@@ -353,7 +368,7 @@ defmodule XmlBuilder do
 
   defp format_attributes(attrs),
     do:
-      Enum.map_join(attrs, " ", fn {name, value} ->
+      map_intersperse(attrs, " ", fn {name, value} ->
         [to_string(name), '=', quote_attribute_value(value)]
       end)
 
@@ -366,22 +381,17 @@ defmodule XmlBuilder do
     do: quote_attribute_value(to_string(val))
 
   defp quote_attribute_value(val) do
-    double = String.contains?(val, ~s|"|)
-    single = String.contains?(val, "'")
-    escaped = escape(val)
+    escape? = String.contains?(val, ["\"", "&", "<"])
 
-    cond do
-      double && single ->
-        escaped |> String.replace("\"", "&quot;") |> quote_attribute_value
-
-      double ->
-        "'#{escaped}'"
-
-      true ->
-        ~s|"#{escaped}"|
+    case escape? do
+      true -> [?", escape(val), ?"]
+      false -> [?", val, ?"]
     end
   end
 
+  defp escape({:iodata, iodata}), do: iodata
+  defp escape({:safe, data}) when is_bitstring(data), do: data
+  defp escape({:safe, data}), do: to_string(data)
   defp escape({:cdata, data}), do: ["<![CDATA[", data, "]]>"]
 
   defp escape(data) when is_binary(data),
@@ -404,4 +414,14 @@ defmodule XmlBuilder do
   defp escape_entity(<<"quot;"::utf8, rest::binary>>), do: ["&quot;" | escape_string(rest)]
   defp escape_entity(<<"apos;"::utf8, rest::binary>>), do: ["&apos;" | escape_string(rest)]
   defp escape_entity(rest), do: ["&amp;" | escape_string(rest)]
+
+  # Remove when support for Elixir <v1.10 is dropped
+  @compile {:inline, map_intersperse: 3}
+  if function_exported?(Enum, :map_intersperse, 3) do
+    defp map_intersperse(enumerable, separator, mapper),
+      do: Enum.map_intersperse(enumerable, separator, mapper)
+  else
+    defp map_intersperse(enumerable, separator, mapper),
+      do: enumerable |> Enum.map(mapper) |> Enum.intersperse(separator)
+  end
 end
