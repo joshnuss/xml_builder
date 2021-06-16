@@ -261,9 +261,10 @@ defmodule XmlBuilderTest do
 
   test "quoting and escaping attributes" do
     assert element(:person, %{height: 12}) == ~s|<person height="12"/>|
-    assert element(:person, %{height: ~s|10'|}) == ~s|<person height="10&apos;"/>|
-    assert element(:person, %{height: ~s|10"|}) == ~s|<person height='10&quot;'/>|
+    assert element(:person, %{height: ~s|10'|}) == ~s|<person height="10'"/>|
+    assert element(:person, %{height: ~s|10"|}) == ~s|<person height="10&quot;"/>|
     assert element(:person, %{height: ~s|<10'5"|}) == ~s|<person height="&lt;10&apos;5&quot;"/>|
+    assert element(:person, %{height: ~s|<10|}) == ~s|<person height="&lt;10"/>|
   end
 
   test "escaping content" do

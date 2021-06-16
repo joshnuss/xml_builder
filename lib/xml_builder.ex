@@ -376,19 +376,11 @@ defmodule XmlBuilder do
     do: quote_attribute_value(to_string(val))
 
   defp quote_attribute_value(val) do
-    double = String.contains?(val, ~s|"|)
-    single = String.contains?(val, "'")
-    escaped = escape(val)
+    escape? = String.contains?(val, ["\"", "&", "<"])
 
-    cond do
-      double && single ->
-        escaped |> String.replace("\"", "&quot;") |> quote_attribute_value
-
-      double ->
-        [?', escaped, ?']
-
-      true ->
-        [?", escaped, ?"]
+    case escape? do
+      true -> [?", escape(val), ?"]
+      false -> [?", val, ?"]
     end
   end
 
