@@ -221,8 +221,8 @@ defmodule XmlBuilder do
 
   ## Examples
 
-    iex> XmlBuilder.generate_iodata(XmlBuilder.element(:person))
-    ["", '<', "person", '/>']
+      iex> XmlBuilder.generate_iodata(XmlBuilder.element(:person))
+      ["", '<', "person", '/>']
   """
   def generate_iodata(any, options \\ []), do: format(any, 0, options)
 
