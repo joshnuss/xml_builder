@@ -254,6 +254,12 @@ defmodule XmlBuilderTest do
 
         assert doc([{:first_name, "Josh"}, {:last_name, "Nussbaum"}]) ==
                  ~s|<?xml version="1.0" encoding="UTF-8"?>\n<first_name>Josh</first_name>\n<last_name>Nussbaum</last_name>|
+
+        assert doc([:first_name, :middle_name, :last_name]) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<first_name/>\n<middle_name/>\n<last_name/>|
+
+        assert doc([:first_name, nil, :last_name]) ==
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<first_name/>\n<last_name/>|
       end)
 
     assert warning =~ "doc/1 is deprecated. Use document/1 with generate/1 instead."
