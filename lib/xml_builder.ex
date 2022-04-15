@@ -110,7 +110,7 @@ defmodule XmlBuilder do
     do: element({name})
 
   def element(list) when is_list(list),
-    do: Enum.map(list, &element/1)
+    do: list |> Enum.reject(&is_nil/1) |> Enum.map(&element/1)
 
   def element({name}),
     do: element({name, nil, nil})
@@ -122,7 +122,7 @@ defmodule XmlBuilder do
     do: element({name, nil, content})
 
   def element({name, attrs, content}) when is_list(content),
-    do: {name, attrs, Enum.map(content, &element/1)}
+    do: {name, attrs, element(content)}
 
   def element({name, attrs, content}),
     do: {name, attrs, content}
