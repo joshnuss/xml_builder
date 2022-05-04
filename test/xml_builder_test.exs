@@ -104,8 +104,7 @@ defmodule XmlBuilderTest do
       expectation =
         "<pre>\n<code class=\"elixir\">def foo, do: :ok\n\ndef bar, do: :error</code>\n</pre>"
 
-      assert XmlBuilder.generate(input, format: [*: :indented, code: :none]) ==
-               expectation
+      assert XmlBuilder.generate(input, format: [*: :indented, code: :none]) == expectation
     end
 
     test "whitespace character option is used" do
