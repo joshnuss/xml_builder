@@ -226,7 +226,9 @@ defmodule XmlBuilder do
   """
   def generate_iodata(any, options \\ []), do: format(any, 0, options)
 
-  defp format(:xml_decl, 0, options) do
+  defp format(content, level, options, name \\ nil)
+
+  defp format(:xml_decl, 0, options, _name) do
     encoding = Keyword.get(options, :encoding, "UTF-8")
 
     standalone =
@@ -239,10 +241,10 @@ defmodule XmlBuilder do
     ['<?xml version="1.0" encoding="', to_string(encoding), ?", standalone, '?>']
   end
 
-  defp format({:doctype, {:system, name, system}}, 0, _options),
+  defp format({:doctype, {:system, name, system}}, 0, _options, _name),
     do: ['<!DOCTYPE ', to_string(name), ' SYSTEM "', to_string(system), '">']
 
-  defp format({:doctype, {:public, name, public, system}}, 0, _options),
+  defp format({:doctype, {:public, name, public, system}}, 0, _options, _name),
     do: [
       '<!DOCTYPE ',
       to_string(name),
@@ -253,86 +255,86 @@ defmodule XmlBuilder do
       '">'
     ]
 
-  defp format(string, level, options) when is_bitstring(string),
-    do: format({nil, nil, string}, level, options)
+  defp format(string, level, options, name) when is_bitstring(string),
+    do: format({nil, nil, string}, level, options, name)
 
-  defp format(list, level, options) when is_list(list) do
-    formatter = formatter(options)
-    map_intersperse(list, formatter.line_break(), &format(&1, level, options))
+  defp format(list, level, options, name) when is_list(list) do
+    formatter = formatter(name, options)
+    map_intersperse(list, formatter.line_break(), &format(&1, level, options, name))
   end
 
-  defp format({nil, nil, name}, level, options) when is_bitstring(name),
-    do: [indent(level, options), to_string(name)]
+  defp format({nil, nil, content}, level, options, name) when is_bitstring(content),
+    do: [indent(name, level, options), to_string(content)]
 
-  defp format({nil, nil, {:iodata, iodata}}, _level, _options), do: iodata
+  defp format({nil, nil, {:iodata, iodata}}, _level, _options, _name), do: iodata
 
-  defp format({name, attrs, content}, level, options)
+  defp format({name, attrs, content}, level, options, _name)
        when is_blank_attrs(attrs) and is_blank_list(content),
-       do: [indent(level, options), '<', to_string(name), '/>']
+       do: [indent(name, level, options), '<', to_string(name), '/>']
 
-  defp format({name, attrs, content}, level, options) when is_blank_list(content),
-    do: [indent(level, options), '<', to_string(name), ' ', format_attributes(attrs), '/>']
+  defp format({name, attrs, content}, level, options, _name) when is_blank_list(content),
+    do: [indent(name, level, options), '<', to_string(name), ' ', format_attributes(attrs), '/>']
 
-  defp format({name, attrs, content}, level, options)
+  defp format({name, attrs, content}, level, options, _name)
        when is_blank_attrs(attrs) and not is_list(content),
        do: [
-         indent(level, options),
+         indent(name, level, options),
          '<',
          to_string(name),
          '>',
-         format_content(content, level + 1, options),
+         format_content(name, content, level + 1, options),
          '</',
          to_string(name),
          '>'
        ]
 
-  defp format({name, attrs, content}, level, options)
+  defp format({name, attrs, content}, level, options, _name)
        when is_blank_attrs(attrs) and is_list(content) do
-    format_char = formatter(options).line_break()
+    format_char = formatter(name, options).line_break()
 
     [
-      indent(level, options),
+      indent(name, level, options),
       '<',
       to_string(name),
       '>',
-      format_content(content, level + 1, options),
+      format_content(name, content, level + 1, options),
       format_char,
-      indent(level, options),
+      indent(name, level, options),
       '</',
       to_string(name),
       '>'
     ]
   end
 
-  defp format({name, attrs, content}, level, options)
+  defp format({name, attrs, content}, level, options, _name)
        when not is_blank_attrs(attrs) and not is_list(content),
        do: [
-         indent(level, options),
+         indent(name, level, options),
          '<',
          to_string(name),
          ' ',
          format_attributes(attrs),
          '>',
-         format_content(content, level + 1, options),
+         format_content(name, content, level + 1, options),
          '</',
          to_string(name),
          '>'
        ]
 
-  defp format({name, attrs, content}, level, options)
+  defp format({name, attrs, content}, level, options, _name)
        when not is_blank_attrs(attrs) and is_list(content) do
-    format_char = formatter(options).line_break()
+    format_char = formatter(name, options).line_break()
 
     [
-      indent(level, options),
+      indent(name, level, options),
       '<',
       to_string(name),
       ' ',
       format_attributes(attrs),
       '>',
-      format_content(content, level + 1, options),
+      format_content(name, content, level + 1, options),
       format_char,
-      indent(level, options),
+      indent(name, level, options),
       '</',
       to_string(name),
       '>'
@@ -351,19 +353,26 @@ defmodule XmlBuilder do
   defp first_element(element_spec),
     do: element(element_spec)
 
-  defp formatter(options) do
+  defp formatter(name, options) do
     case Keyword.get(options, :format) do
-      :none -> XmlBuilder.Format.None
-      _ -> XmlBuilder.Format.Indented
+      :none ->
+        XmlBuilder.Format.None
+
+      default when default in [nil, :indent, :indented] ->
+        XmlBuilder.Format.Indented
+
+      custom when is_list(custom) ->
+        format = Keyword.get_lazy(custom, name, fn -> Keyword.get(custom, :*, :indent) end)
+        formatter(name, Keyword.put(options, :format, format))
     end
   end
 
-  defp format_content(children, level, options) when is_list(children) do
-    format_char = formatter(options).line_break()
-    [format_char, map_intersperse(children, format_char, &format(&1, level, options))]
+  defp format_content(name, children, level, options) when is_list(children) do
+    format_char = formatter(name, options).line_break()
+    [format_char, map_intersperse(children, format_char, &format(&1, level, options, name))]
   end
 
-  defp format_content(content, _level, _options),
+  defp format_content(_name, content, _level, _options),
     do: escape(content)
 
   defp format_attributes(attrs),
@@ -372,8 +381,8 @@ defmodule XmlBuilder do
         [to_string(name), '=', quote_attribute_value(value)]
       end)
 
-  defp indent(level, options) do
-    formatter = formatter(options)
+  defp indent(name, level, options) do
+    formatter = formatter(name, options)
     formatter.indentation(level, options)
   end
 

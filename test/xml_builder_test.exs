@@ -96,6 +96,18 @@ defmodule XmlBuilderTest do
       assert XmlBuilder.generate(input(), format: :none) == expectation
     end
 
+    test "when format = keyword()" do
+      input =
+        {:pre, nil,
+         [{:code, %{class: "elixir"}, ["def foo, do: :ok", "\n", "\n", "def bar, do: :error"]}]}
+
+      expectation =
+        "<pre>\n<code class=\"elixir\">def foo, do: :ok\n\ndef bar, do: :error</code>\n</pre>"
+
+      assert XmlBuilder.generate(input, format: [*: :indented, code: :none]) ==
+               expectation
+    end
+
     test "whitespace character option is used" do
       expectation = "<level1>\n\t<level2>test_value</level2>\n</level1>"
       assert XmlBuilder.generate(input(), whitespace: "\t") == expectation
