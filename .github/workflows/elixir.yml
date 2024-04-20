@@ -4,18 +4,33 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: Elixir ${{matrix.elixir}} (Erlang/OTP ${{matrix.otp}})
+    name: Test (${{matrix.elixir}}/${{matrix.otp}})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        otp: ['22.3']
-        elixir: ['1.11.2', '1.10.4', '1.9.4', '1.8.2', '1.7.4', '1.6.6']
+        otp: [24.x, 25.x, 26.x]
+        elixir: [1.12.x, 1.13.x, 1.14.x, 1.15.x, 1.16.x]
+        exclude:
+          - otp: 26.x
+            elixir: 1.13.x
+        exclude:
+          - otp: 26.x
+            elixir: 1.12.x
+        exclude:
+          - otp: 25.x
+            elixir: 1.12.x
     steps:
-      - uses: actions/checkout@v2
-      - uses: erlef/setup-beam@v1
-        with:
-          otp-version: ${{matrix.otp}}
-          elixir-version: ${{matrix.elixir}}
+    - uses: actions/checkout@v4
+    - uses: erlef/setup-beam@v1
+      with:
+        elixir-version: ${{ matrix.elixir }}
+        otp-version: ${{ matrix.otp }}
+    - name: Restore dependencies cache
+      uses: actions/cache@v4
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
       - run: mix deps.get
       - run: mix compile --warnings-as-errors
       - run: mix format --check-formatted
