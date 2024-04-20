@@ -236,21 +236,21 @@ defmodule XmlBuilder do
         nil -> ""
       end
 
-    ['<?xml version="1.0" encoding="', to_string(encoding), ?", standalone, '?>']
+    [~c"<?xml version=\"1.0\" encoding=\"", to_string(encoding), ?", standalone, ~c"?>"]
   end
 
   defp format({:doctype, {:system, name, system}}, 0, _options),
-    do: ['<!DOCTYPE ', to_string(name), ' SYSTEM "', to_string(system), '">']
+    do: [~c"<!DOCTYPE ", to_string(name), ~c" SYSTEM \"", to_string(system), ~c"\">"]
 
   defp format({:doctype, {:public, name, public, system}}, 0, _options),
     do: [
-      '<!DOCTYPE ',
+      ~c"<!DOCTYPE ",
       to_string(name),
-      ' PUBLIC "',
+      ~c" PUBLIC \"",
       to_string(public),
-      '" "',
+      ~c"\" \"",
       to_string(system),
-      '">'
+      ~c"\">"
     ]
 
   defp format(string, level, options) when is_bitstring(string),
@@ -268,22 +268,22 @@ defmodule XmlBuilder do
 
   defp format({name, attrs, content}, level, options)
        when is_blank_attrs(attrs) and is_blank_list(content),
-       do: [indent(level, options), '<', to_string(name), '/>']
+       do: [indent(level, options), ~c"<", to_string(name), ~c"/>"]
 
   defp format({name, attrs, content}, level, options) when is_blank_list(content),
-    do: [indent(level, options), '<', to_string(name), ' ', format_attributes(attrs), '/>']
+    do: [indent(level, options), ~c"<", to_string(name), ~c" ", format_attributes(attrs), ~c"/>"]
 
   defp format({name, attrs, content}, level, options)
        when is_blank_attrs(attrs) and not is_list(content),
        do: [
          indent(level, options),
-         '<',
+         ~c"<",
          to_string(name),
-         '>',
+         ~c">",
          format_content(content, level + 1, options),
-         '</',
+         ~c"</",
          to_string(name),
-         '>'
+         ~c">"
        ]
 
   defp format({name, attrs, content}, level, options)
@@ -292,15 +292,15 @@ defmodule XmlBuilder do
 
     [
       indent(level, options),
-      '<',
+      ~c"<",
       to_string(name),
-      '>',
+      ~c">",
       format_content(content, level + 1, options),
       format_char,
       indent(level, options),
-      '</',
+      ~c"</",
       to_string(name),
-      '>'
+      ~c">"
     ]
   end
 
@@ -308,15 +308,15 @@ defmodule XmlBuilder do
        when not is_blank_attrs(attrs) and not is_list(content),
        do: [
          indent(level, options),
-         '<',
+         ~c"<",
          to_string(name),
-         ' ',
+         ~c" ",
          format_attributes(attrs),
-         '>',
+         ~c">",
          format_content(content, level + 1, options),
-         '</',
+         ~c"</",
          to_string(name),
-         '>'
+         ~c">"
        ]
 
   defp format({name, attrs, content}, level, options)
@@ -325,17 +325,17 @@ defmodule XmlBuilder do
 
     [
       indent(level, options),
-      '<',
+      ~c"<",
       to_string(name),
-      ' ',
+      ~c" ",
       format_attributes(attrs),
-      '>',
+      ~c">",
       format_content(content, level + 1, options),
       format_char,
       indent(level, options),
-      '</',
+      ~c"</",
       to_string(name),
-      '>'
+      ~c">"
     ]
   end
 
@@ -369,7 +369,7 @@ defmodule XmlBuilder do
   defp format_attributes(attrs),
     do:
       map_intersperse(attrs, " ", fn {name, value} ->
-        [to_string(name), '=', quote_attribute_value(value)]
+        [to_string(name), ~c"=", quote_attribute_value(value)]
       end)
 
   defp indent(level, options) do

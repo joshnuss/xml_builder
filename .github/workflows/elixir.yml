@@ -13,10 +13,8 @@ jobs:
         exclude:
           - otp: 26.x
             elixir: 1.13.x
-        exclude:
           - otp: 26.x
             elixir: 1.12.x
-        exclude:
           - otp: 25.x
             elixir: 1.12.x
     steps:
@@ -31,8 +29,8 @@ jobs:
         path: deps
         key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
         restore-keys: ${{ runner.os }}-mix-
-      - run: mix deps.get
-      - run: mix compile --warnings-as-errors
-      - run: mix format --check-formatted
-      - run: mix credo --strict
-      - run: mix test
+    - run: mix deps.get
+    - run: mix compile --warnings-as-errors
+    - run: mix format --check-formatted
+    - run: mix credo --strict
+    - run: mix test

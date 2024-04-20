@@ -301,7 +301,7 @@ defmodule XmlBuilderTest do
 
     assert XmlBuilder.element(:person, {:iodata, ["test", ?i, "ng 123"]})
            |> XmlBuilder.generate_iodata() ==
-             ["", '<', "person", '>', ["test", ?i, "ng 123"], '</', "person", '>']
+             ["", ~c"<", "person", ~c">", ["test", ?i, "ng 123"], ~c"</", "person", ~c">"]
   end
 
   test "multi level indentation" do
