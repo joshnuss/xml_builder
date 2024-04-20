@@ -162,8 +162,10 @@ defmodule XmlBuilderTest do
   test "element with attributes" do
     warning =
       capture_io(:stderr, fn ->
-        assert doc(:person, %{occupation: "Developer", city: "Montreal"}) ==
-                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer"/>|
+        assert doc(:person, %{occupation: "Developer", city: "Montreal"}) in [
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer"/>|,
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person occupation="Developer" city="Montreal"/>|
+               ]
 
         assert doc(:person, %{}) == ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person/>|
       end)
@@ -174,11 +176,15 @@ defmodule XmlBuilderTest do
   test "element with attributes and content" do
     warning =
       capture_io(:stderr, fn ->
-        assert doc(:person, %{occupation: "Developer", city: "Montreal"}, "Josh") ==
-                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer">Josh</person>|
+        assert doc(:person, %{occupation: "Developer", city: "Montreal"}, "Josh") in [
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer">Josh</person>|,
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person occupation="Developer" city="Montreal">Josh</person>|
+               ]
 
-        assert doc(:person, %{occupation: "Developer", city: "Montreal"}, nil) ==
-                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer"/>|
+        assert doc(:person, %{occupation: "Developer", city: "Montreal"}, nil) in [
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person city="Montreal" occupation="Developer"/>|,
+                 ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person occupation="Developer" city="Montreal"/>|
+               ]
 
         assert doc(:person, %{}, "Josh") ==
                  ~s|<?xml version="1.0" encoding="UTF-8"?>\n<person>Josh</person>|
