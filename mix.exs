@@ -7,7 +7,7 @@ defmodule XmlBuilder.Mixfile do
     [
       app: :xml_builder,
       version: "2.2.0",
-      elixir: "~> 1.6",
+      elixir: "~> 1.12",
       deps: deps(),
       docs: docs(),
       package: [
@@ -25,7 +25,7 @@ defmodule XmlBuilder.Mixfile do
 
   defp deps do
     [
-      {:credo, ">= 1.4.0 and < 1.5.0", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7.5", only: [:dev, :test], runtime: false},
       {:ex_doc, github: "elixir-lang/ex_doc", only: :dev}
     ]
   end
