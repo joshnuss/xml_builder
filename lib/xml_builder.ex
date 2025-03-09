@@ -257,8 +257,7 @@ defmodule XmlBuilder do
     do: format({nil, nil, string}, level, options)
 
   defp format(list, level, options) when is_list(list) do
-    formatter = formatter(options)
-    map_intersperse(list, formatter.line_break(), &format(&1, level, options))
+    format_children(list, level, options)
   end
 
   defp format({nil, nil, name}, level, options) when is_bitstring(name),
@@ -339,6 +338,27 @@ defmodule XmlBuilder do
     ]
   end
 
+  defp format_children(list, level, options) when is_list(list) do
+    format_char = formatter(options).line_break()
+
+    {result, _} =
+      Enum.flat_map_reduce(list, 0, fn
+        [], count ->
+          {[], count}
+
+        nil, count ->
+          {[], count}
+
+        elm, 0 ->
+          {[format(elm, level, options)], 1}
+
+        elm, count ->
+          {[format_char, format(elm, level, options)], count + 1}
+      end)
+
+    result
+  end
+
   defp elements_with_prolog([first | rest]) when length(rest) > 0,
     do: [first_element(first) | element(rest)]
 
@@ -360,7 +380,7 @@ defmodule XmlBuilder do
 
   defp format_content(children, level, options) when is_list(children) do
     format_char = formatter(options).line_break()
-    [format_char, map_intersperse(children, format_char, &format(&1, level, options))]
+    [format_char, format_children(children, level, options)]
   end
 
   defp format_content(content, _level, _options),
