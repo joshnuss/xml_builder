@@ -343,17 +343,15 @@ defmodule XmlBuilder do
 
     {result, _} =
       Enum.flat_map_reduce(list, 0, fn
-        [], count ->
+        elm, count when is_blank_list(elm) ->
           {[], count}
-
-        nil, count ->
-          {[], count}
-
-        elm, 0 ->
-          {[format(elm, level, options)], 1}
 
         elm, count ->
-          {[format_char, format(elm, level, options)], count + 1}
+          if format_char == "" or count == 0 do
+            {[format(elm, level, options)], count + 1}
+          else
+            {[format_char, format(elm, level, options)], count + 1}
+          end
       end)
 
     result
