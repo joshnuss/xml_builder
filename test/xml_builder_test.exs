@@ -282,6 +282,7 @@ defmodule XmlBuilderTest do
   test "escaping content" do
     assert element(:person, "Josh") == "<person>Josh</person>"
     assert element(:person, "<Josh>") == "<person>&lt;Josh&gt;</person>"
+    assert element(:paragraph, ["I <3 Elixir ", XmlBuilder.element(:bold, "& XmlBuilder")]) == "<paragraph>\n  I &lt;3 Elixir \n  <bold>&amp; XmlBuilder</bold>\n</paragraph>"
 
     assert element(:data, ~s|1 <> 2 & 2 <> 3 "'"'|) ==
              "<data>1 &lt;&gt; 2 &amp; 2 &lt;&gt; 3 &quot;&apos;&quot;&apos;</data>"
