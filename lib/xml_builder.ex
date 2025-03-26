@@ -339,18 +339,18 @@ defmodule XmlBuilder do
   end
 
   defp format_children(list, level, options) when is_list(list) do
-    format_char = formatter(options).line_break()
+    line_break = formatter(options).line_break()
 
     {result, _} =
       Enum.flat_map_reduce(list, 0, fn
-        elm, count when is_blank_list(elm) ->
+        element, count when is_blank_list(element) ->
           {[], count}
 
-        elm, count ->
-          if format_char == "" or count == 0 do
-            {[format(elm, level, options)], count + 1}
+        element, count ->
+          if line_break == "" or count == 0 do
+            {[format(element, level, options)], count + 1}
           else
-            {[format_char, format(elm, level, options)], count + 1}
+            {[line_break, format(element, level, options)], count + 1}
           end
       end)
 
