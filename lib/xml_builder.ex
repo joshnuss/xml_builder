@@ -260,8 +260,8 @@ defmodule XmlBuilder do
     format_children(list, level, options)
   end
 
-  defp format({nil, nil, name}, level, options) when is_bitstring(name),
-    do: [indent(level, options), to_string(name)]
+  defp format({nil, nil, content}, level, options) when is_bitstring(content),
+    do: [indent(level, options), format_content(content, level, options)]
 
   defp format({nil, nil, {:iodata, iodata}}, _level, _options), do: iodata
 
