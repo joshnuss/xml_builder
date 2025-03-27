@@ -320,6 +320,12 @@ defmodule XmlBuilderTest do
     assert warning =~ "doc/1 is deprecated. Use document/1 with generate/1 instead."
   end
 
+  test "removal of empty child elements" do
+    assert {:person, nil, [nil, {:first, nil, "Josh"}, [], {:last, nil, "Nussbaum"}]}
+           |> XmlBuilder.generate() ==
+             ~s|<person>\n  <first>Josh</first>\n  <last>Nussbaum</last>\n</person>|
+  end
+
   def element(name, arg),
     do: XmlBuilder.element(name, arg) |> XmlBuilder.generate()
 
