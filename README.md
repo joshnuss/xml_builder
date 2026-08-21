@@ -25,7 +25,7 @@ Add dependency to your project's `mix.exs`:
 
 ```elixir
 def deps do
-  [{:xml_builder, "~> 2.1"}]
+  [{:xml_builder, "~> 2.4"}]
 end
 ```
 
