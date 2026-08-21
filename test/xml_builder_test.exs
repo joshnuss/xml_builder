@@ -301,6 +301,33 @@ defmodule XmlBuilderTest do
              ~s|<person name="&amp;lt;script&amp;gt;"/>|
   end
 
+  test "raises when an element name would inject a comment node (GHSA-r82p-3q2p-728w)" do
+    malicious_tag = ~s|x><!-- ATTACKER-INJECTED-COMMENT --><inject evil="yes"|
+
+    assert_raise XmlBuilder.SanitizationError, fn ->
+      XmlBuilder.element(malicious_tag, %{safe: "ok"}, "inner")
+      |> XmlBuilder.generate()
+    end
+  end
+
+  test "raises when an element name would inject a new element (GHSA-r82p-3q2p-728w)" do
+    malicious_tag = ~s|x><!-- ATTACKER-INJECTED-COMMENT --><inject evil="yes"|
+
+    assert_raise XmlBuilder.SanitizationError, fn ->
+      XmlBuilder.element(malicious_tag, %{safe: "ok"}, "inner")
+      |> XmlBuilder.generate()
+    end
+  end
+
+  test "raises when an attribute name would break out of markup (GHSA-r82p-3q2p-728w)" do
+    malicious_attr_name = ~s|safe="ok" onload="alert(1)"|
+
+    assert_raise XmlBuilder.SanitizationError, fn ->
+      XmlBuilder.element(:x, %{malicious_attr_name => "v"}, "inner")
+      |> XmlBuilder.generate()
+    end
+  end
+
   test "wrap content inside cdata and skip escaping" do
     assert element(:person, {:cdata, "john & <is ok>"}) ==
              "<person><![CDATA[john & <is ok>]]></person>"

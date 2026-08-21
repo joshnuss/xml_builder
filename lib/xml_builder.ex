@@ -267,21 +267,21 @@ defmodule XmlBuilder do
 
   defp format({name, attrs, content}, level, options)
        when is_blank_attrs(attrs) and is_blank_list(content),
-       do: [indent(level, options), ~c"<", to_string(name), ~c"/>"]
+       do: [indent(level, options), ~c"<", sanitize!(name), ~c"/>"]
 
   defp format({name, attrs, content}, level, options) when is_blank_list(content),
-    do: [indent(level, options), ~c"<", to_string(name), ~c" ", format_attributes(attrs), ~c"/>"]
+    do: [indent(level, options), ~c"<", sanitize!(name), ~c" ", format_attributes(attrs), ~c"/>"]
 
   defp format({name, attrs, content}, level, options)
        when is_blank_attrs(attrs) and not is_list(content),
        do: [
          indent(level, options),
          ~c"<",
-         to_string(name),
+         sanitize!(name),
          ~c">",
          format_content(content, level + 1, options),
          ~c"</",
-         to_string(name),
+         sanitize!(name),
          ~c">"
        ]
 
@@ -292,13 +292,13 @@ defmodule XmlBuilder do
     [
       indent(level, options),
       ~c"<",
-      to_string(name),
+      sanitize!(name),
       ~c">",
       format_content(content, level + 1, options),
       format_char,
       indent(level, options),
       ~c"</",
-      to_string(name),
+      sanitize!(name),
       ~c">"
     ]
   end
@@ -308,13 +308,13 @@ defmodule XmlBuilder do
        do: [
          indent(level, options),
          ~c"<",
-         to_string(name),
+         sanitize!(name),
          ~c" ",
          format_attributes(attrs),
          ~c">",
          format_content(content, level + 1, options),
          ~c"</",
-         to_string(name),
+         sanitize!(name),
          ~c">"
        ]
 
@@ -325,7 +325,7 @@ defmodule XmlBuilder do
     [
       indent(level, options),
       ~c"<",
-      to_string(name),
+      sanitize!(name),
       ~c" ",
       format_attributes(attrs),
       ~c">",
@@ -333,7 +333,7 @@ defmodule XmlBuilder do
       format_char,
       indent(level, options),
       ~c"</",
-      to_string(name),
+      sanitize!(name),
       ~c">"
     ]
   end
@@ -387,8 +387,23 @@ defmodule XmlBuilder do
   defp format_attributes(attrs),
     do:
       map_intersperse(attrs, " ", fn {name, value} ->
-        [to_string(name), ~c"=", quote_attribute_value(value)]
+        [sanitize!(name), ~c"=", quote_attribute_value(value)]
       end)
+
+  # Simplified XML `Name` production: disallows whitespace and the
+  # structural characters (`<`, `>`, `"`, `'`, `&`, `/`, `=`) that would
+  # let a name break out of a tag or attribute list.
+  @name_pattern ~r/^[\p{L}_:][\p{L}\p{N}_.\-:]*$/u
+
+  defp sanitize!(name) do
+    string = to_string(name)
+
+    unless String.match?(string, @name_pattern) do
+      raise XmlBuilder.SanitizationError, "invalid XML name: #{inspect(string)}"
+    end
+
+    string
+  end
 
   defp indent(level, options) do
     formatter = formatter(options)
