@@ -425,7 +425,8 @@ defmodule XmlBuilder do
   defp escape({:iodata, iodata}), do: iodata
   defp escape({:safe, data}) when is_bitstring(data), do: data
   defp escape({:safe, data}), do: to_string(data)
-  defp escape({:cdata, data}), do: ["<![CDATA[", data, "]]>"]
+  defp escape({:cdata, data}),
+    do: ["<![CDATA[", String.replace(data, "]]>", "]]]]><![CDATA[>"), "]]>"]
 
   defp escape(data) when is_binary(data),
     do: data |> escape_string() |> to_string()

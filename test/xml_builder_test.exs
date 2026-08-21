@@ -333,6 +333,12 @@ defmodule XmlBuilderTest do
              "<person><![CDATA[john & <is ok>]]></person>"
   end
 
+  test "does not let cdata content break out of the CDATA section (GHSA-67r9-hmxw-h595)" do
+    output = element(:note, {:cdata, "]]><injected/><![CDATA["})
+
+    refute output =~ "]]><injected/>"
+  end
+
   test "wrap content inside safe and skip escaping" do
     assert element(:person, {:safe, "john & <is ok>"}) == "<person>john & <is ok></person>"
   end
