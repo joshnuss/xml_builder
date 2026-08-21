@@ -290,7 +290,15 @@ defmodule XmlBuilderTest do
              "<data>1 &lt;&gt; 2 &amp; 2 &lt;&gt; 3 &quot;&apos;&quot;&apos;</data>"
 
     assert element(:data, ~s|&gt;&lt;&quot;&apos;&amp;|) ==
-             "<data>&gt;&lt;&quot;&apos;&amp;</data>"
+             "<data>&amp;gt;&amp;lt;&amp;quot;&amp;apos;&amp;amp;</data>"
+  end
+
+  test "escapes literal & even when followed by an entity-like token (GHSA-5hjx-8g53-cmvm)" do
+    assert element(:data, "&lt;script&gt;alert(1)&lt;/script&gt;") ==
+             "<data>&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;</data>"
+
+    assert element(:person, %{name: "&lt;script&gt;"}) ==
+             ~s|<person name="&amp;lt;script&amp;gt;"/>|
   end
 
   test "wrap content inside cdata and skip escaping" do

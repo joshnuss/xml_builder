@@ -419,19 +419,12 @@ defmodule XmlBuilder do
     do: data |> to_string() |> escape_string() |> to_string()
 
   defp escape_string(""), do: ""
-  defp escape_string(<<"&"::utf8, rest::binary>>), do: escape_entity(rest)
+  defp escape_string(<<"&"::utf8, rest::binary>>), do: ["&amp;" | escape_string(rest)]
   defp escape_string(<<"<"::utf8, rest::binary>>), do: ["&lt;" | escape_string(rest)]
   defp escape_string(<<">"::utf8, rest::binary>>), do: ["&gt;" | escape_string(rest)]
   defp escape_string(<<"\""::utf8, rest::binary>>), do: ["&quot;" | escape_string(rest)]
   defp escape_string(<<"'"::utf8, rest::binary>>), do: ["&apos;" | escape_string(rest)]
   defp escape_string(<<c::utf8, rest::binary>>), do: [c | escape_string(rest)]
-
-  defp escape_entity(<<"amp;"::utf8, rest::binary>>), do: ["&amp;" | escape_string(rest)]
-  defp escape_entity(<<"lt;"::utf8, rest::binary>>), do: ["&lt;" | escape_string(rest)]
-  defp escape_entity(<<"gt;"::utf8, rest::binary>>), do: ["&gt;" | escape_string(rest)]
-  defp escape_entity(<<"quot;"::utf8, rest::binary>>), do: ["&quot;" | escape_string(rest)]
-  defp escape_entity(<<"apos;"::utf8, rest::binary>>), do: ["&apos;" | escape_string(rest)]
-  defp escape_entity(rest), do: ["&amp;" | escape_string(rest)]
 
   # Remove when support for Elixir <v1.10 is dropped
   @compile {:inline, map_intersperse: 3}
